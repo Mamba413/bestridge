@@ -5,7 +5,7 @@ vignette: >
   %\VignetteIndexEntry{An introduction to BeSS}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
-  %\VignetteDepends{dglars, HCmodelSets, ROCR}
+  %\VignetteDepends{dglars, HCmodelSets}
 bibliography: ref.bib
 ---
 
@@ -30,7 +30,7 @@ One of the main tasks of statistical modeling is to exploit the association betw
  \end{align*}
 
   where $\log L(\beta)$ is the log-likelihood function in the GLM case or the log partial likelihood function In the Cox model. $\Vert \beta\Vert_0$ denotes the $L_0$ norm of $\beta$, i.e., the number of non-zeros in $\beta$. The vanilla $L_0$ regularization gains the minimum-variance unbiased estimator on the active set. For restricted fits, the estimation bias is positive, and it is worthwhile if the decrease in variance exceeds the increase in bias. Here We would like to introduce the best ridge regression as an option of bias-variance tradeoff. This will add an $L_2$ norm shrinkage to the coefficients, the strength of which is controlled by the parameter $\lambda$. 
-  The fitting is done over a grid of sparsity $s$ and $\lambda$ values to generate a regularization path. For each candidate model size and $\lambda$, the best ridge regression is solved by the $L_2$ penalized primal-dual active set algorithm. This algorithm utilizes an active set updating strategy via primal and dual variables and fits the sub-model by exploiting the fact that their support sets are non-overlap and complementary. For the case of `method = "sequential"` if `is_warms_start = "TRUE"`,  we run this algorithm for a list of sequential combination of model sizes and $\lambda$ and use the estimate from the last iteration as a warm start. For the case of `method = "powell"`, the Powell conjugate direction method is implemented. This method finds the optimal paramters by a bi-directional search along each search vector, in turn. The bi-directional line search along each search vector can be done by sequential search path or golden section search, the line search method of which is specified by `line_search = "sequential"` or `"gsection"`. 
+  The fitting is done over a grid of sparsity $s$ and $\lambda$ values to generate a regularization path. For each candidate model size and $\lambda$, the best ridge regression is solved by the $L_2$ penalized primal-dual active set algorithm. This algorithm utilizes an active set updating strategy via primal and dual variables and fits the sub-model by exploiting the fact that their support sets are non-overlap and complementary. For the case of `method = "sequential"` if `is_warms_start = "TRUE"`,  we run this algorithm for a list of sequential combination of model sizes and $\lambda$ and use the estimate from the last iteration as a warm start. For the case of `method = "powell"`, the Powell conjugate direction method is implemented. This method finds the optimal parameters by a bi-directional search along each search vector, in turn. The bi-directional line search along each search vector can be done by sequential search path or golden section search, the line search method of which is specified by `line_search = "sequential"` or `"gsection"`. 
 
 
 ## 2 Quick start (for L0L2)
@@ -54,56 +54,18 @@ Supposed we wants to fit a best ridge regression model with $\lambda$ taking val
 
 The fitted coefficients can be extracted by running the `coef` function. From the results. 5 probes were selected by the best ridge regression as correlated with TRIM32.
 ```{r}
-#coef(lm.l0l2, sparse = FALSE)[which(coef(lm.l0l2, sparse = FALSE)!=0)]
+# coef(lm.l0l2, sparse = FALSE)[which(coef(lm.l0l2, sparse = FALSE)!=0)]
 ```
 To make a prediction on the new data, a `predict` function can be used as follows:
 ```{r}
 #predict.l0l2 = predict(lm.l0l2, newx = x)
 ```
-For comparison, we also used the primal-dual active set (PDAS) algorithm [@wen2017bess] to solve the vanilla best subset selection problem as follows:
-```{r}
-# lm.pdas = bess(x, y)
-# coef(lm.pdas, sparse = FALSE)[which(coef(lm.pdas, sparse = FALSE)!=0)]
-```
-
-To evaluate the performance of the best ridge regression, we randomly partition the data into a training set and a test set, the training set consisting of 2/3 observations and the test set consisting of the remaining 1/3 observations and calculate the predictive mean square errors (MSEs). We then fit the model with the training set and calculate the prediction MSE for the test set. We repeat this process 20 times, each time a new random partition is made. 
-```{r}
-lm.compare = function(i, x, y){
-  set.seed(i)
-  training_index = sample(1:120, 80)
-  x_train = x[training_index, ]
-  y_train = y[training_index]
-  x_test = x[-training_index, ]
-  y_test = y[-training_index]
-
-  lm.l0l2 = bess(x_train, y_train, type = "bsrr", lambda.max = 100, lambda.min = 0.01)
-  lm.pdas = bess(x_train, y_train)
-
-  y_pred_l0l2 = predict(lm.l0l2, newx = x_test)
-  y_pred_pdas = predict(lm.pdas, newx = x_test)
-  pe_l0l2 = norm(y_pred_l0l2 - y_test, "2")
-  pe_pdas = norm(y_pred_pdas - y_test, "2")
-  res_l0l2 = c(pe = pe_l0l2, ms = length(which(lm.l0l2$beta!=0)))
-  res_pdas = c(pe = pe_pdas, ms = length(which(lm.pdas$beta!=0)))
-  return(rbind(res_l0l2, res_pdas))
-  
-}
-
-# res = lapply(1:20, lm.compare, x, y)
-# res = simplify2array(res)
-# 
-# mean_res = apply(res, c(1, 2), mean)
-# print(mean_res)
-```
- 
-On average, the best ridge regression shows a better performance on prediction accuracy and selects fewer predictors than the best subset selection. 
 
 ### 2.2 Classification: logistic regression
 
 We now turn to the classification task. We use the data set **duke** provided in the R package **dglars** [@west2001predicting]. This data set contains microarray experiment for 44 breast cancer patients. We are interested in classify the patients into estrogen receptor-positive (Status = 0) and estrogen receptor-negative (Status = 1) based on the expression level of the considered genes.
 ```{r, warning=FALSE, message = FALSE}
-library(dglars)
-data(duke)
+data(duke, package = "dglars")
 y = duke$y
 x = duke[, -1]
 ```
@@ -112,16 +74,6 @@ Supposed we wants to do this classification based on logistic regression with $L
 ```{r}
 # logi.l0l2 = bess(x, y, family = "binomial", type = "bsrr",# line.search = "sequential",
 #                  lambda.max = 10, lambda.min = 0.01, screening.num = 100)
-# # 
-# logi.l0l2 <- bess(x, y, family = "binomial", type = "bsrr", method = "psequential",
-#                  lambda.max = 10, lambda.min = 0.01, nlambda = 100 ,
-#                  screening.num = 100)
-#  summary(logi.l0l2)
-#  
-#  logi.l0l2 <- bess(x, y, family = "binomial", type = "bsrr", method = "psequential",
-#                  
-#                  screening.num = 100)
-#  summary(logi.l0l2)
 ```
 
 The `print` method allows users to print the iteration path. The model size and $\lambda$ chosen in each step coupled with deviance and GIC is shown:
@@ -133,43 +85,43 @@ Calling the `plot` routine on an `bess` object fitted by `"bsrr"` algorithm will
  #plot(logi.l0l2)
 ```
 
-Similarly, we also fit an $L_0$ regularized model and plot the GIC for different model size as well as solution paths for each predictor using the `plot` function. The dashed line indicate the optimal model size determined by GIC.
-```{r}
-logi.pdas = bess(x, y, family = "binomial")
-plot(logi.pdas, type = "both")
-```
+<!-- Similarly, we also fit an $L_0$ regularized model and plot the GIC for different model size as well as solution paths for each predictor using the `plot` function. The dashed line indicate the optimal model size determined by GIC. -->
+<!-- ```{r} -->
+<!-- logi.pdas = bess(x, y, family = "binomial") -->
+<!-- plot(logi.pdas, type = "both") -->
+<!-- ``` -->
 
-Only 2 genes are thought informatively related to the AML and ALL classification based on the result of the best ridge regression model and the best subset selection.
+<!-- Only 2 genes are thought informatively related to the AML and ALL classification based on the result of the best ridge regression model and the best subset selection. -->
 
-Again, to evaluate the performance of the best ridge regression, we randomly partition the data into a training set consisting of 2/3 observations and a test set consisting of the remaining. We then fit the model with the training set and calculate the area under the ROC curve (AUC) for the test set. 20 replicas are conducted.
-```{r, warning=F, message=FALSE}
-library(ROCR)
- 
-logi.compare = function(i, x, y){
-  set.seed(i)
-  training_index = sample(1:nrow(x), nrow(x)*2/3)
-  x_train = x[training_index, ]
-  y_train = y[training_index]
-  x_test = x[-training_index, ]
-  y_test = y[-training_index]
-  logi.l0l2 = bess(x_train, y_train, family = "binomial", type = "bsrr", lambda.max = 10, lambda.min = 0.01)
-  logi.pdas = bess(x_train, y_train, family = "binomial")
-  prediction_l0l2=predict(logi.l0l2, newx = x_test)
-  pred_l0l2=prediction(prediction_l0l2,y_test)
-  auc_l0l2 = unlist(slot(performance(pred_l0l2,'auc'),"y.values"))
-  prediction_pdas=predict(logi.pdas, newx = x_test)
-  pred_pdas=prediction(prediction_pdas,y_test)
-  auc_pdas = unlist(slot(performance(pred_pdas,'auc'),"y.values"))
-  
-  res_l0l2 = c(AUC = auc_l0l2, ms = length(which(logi.l0l2$beta!=0)))
-  res_pdas = c(AUC = auc_pdas, ms = length(which(logi.pdas$beta!=0)))
-  return(rbind(res_l0l2, res_pdas))
-}
-# res = lapply(1:2, logi.compare, x, y)
-# res = simplify2array(res)
-# mean_res = apply(res, c(1, 2), mean)
-# print(mean_res)
-```
+<!-- Again, to evaluate the performance of the best ridge regression, we randomly partition the data into a training set consisting of 2/3 observations and a test set consisting of the remaining. We then fit the model with the training set and calculate the area under the ROC curve (AUC) for the test set. 20 replicas are conducted. -->
+<!-- ```{r, warning=F, message=FALSE} -->
+<!-- #library(ROCR) -->
+
+<!-- logi.compare = function(i, x, y){ -->
+<!--   set.seed(i) -->
+<!--   training_index = sample(1:nrow(x), nrow(x)*2/3) -->
+<!--   x_train = x[training_index, ] -->
+<!--   y_train = y[training_index] -->
+<!--   x_test = x[-training_index, ] -->
+<!--   y_test = y[-training_index] -->
+<!--   logi.l0l2 = bess(x_train, y_train, family = "binomial", type = "bsrr", lambda.max = 10, lambda.min = 0.01) -->
+<!--   logi.pdas = bess(x_train, y_train, family = "binomial") -->
+<!--   prediction_l0l2=predict(logi.l0l2, newx = x_test) -->
+<!--   pred_l0l2=prediction(prediction_l0l2,y_test) -->
+<!--   auc_l0l2 = unlist(slot(performance(pred_l0l2,'auc'),"y.values")) -->
+<!--   prediction_pdas=predict(logi.pdas, newx = x_test) -->
+<!--   pred_pdas=prediction(prediction_pdas,y_test) -->
+<!--   auc_pdas = unlist(slot(performance(pred_pdas,'auc'),"y.values")) -->
+
+<!--   res_l0l2 = c(AUC = auc_l0l2, ms = length(which(logi.l0l2$beta!=0))) -->
+<!--   res_pdas = c(AUC = auc_pdas, ms = length(which(logi.pdas$beta!=0))) -->
+<!--   return(rbind(res_l0l2, res_pdas)) -->
+<!-- } -->
+<!-- # res = lapply(1:2, logi.compare, x, y) -->
+<!-- # res = simplify2array(res) -->
+<!-- # mean_res = apply(res, c(1, 2), mean) -->
+<!-- # print(mean_res) -->
+<!-- ``` -->
 
 Again, the best ridge regression tends to predict better and chose fewer predictors than the best subset selection, which is no surprise as an extra $L_2$ penalty plays an rule as coefficient shrinkage.
 
