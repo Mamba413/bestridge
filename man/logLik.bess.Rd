@@ -2,42 +2,42 @@
 % Please edit documentation in R/logLik.bess.R
 \name{logLik.bess}
 \alias{logLik.bess}
-\title{Extract the loglikelihood from a "bess.one" object.}
+\title{Extract the log-likelihood from a "bess.one" object.}
 \usage{
 \method{logLik}{bess}(object, best.model = TRUE, ...)
 }
 \arguments{
 \item{object}{A "\code{bess}" object.}
 
-\item{best.model}{Whether only return the loglikelihood of the best model. Default is \code{TRUE}.
-If \code{best.model = FALSE}, the loglikelihood of the best models with model size and
+\item{best.model}{Whether only return the log-likelihood of the best model. Default is \code{TRUE}.
+If \code{best.model = FALSE}, the log-likelihood of the best models with model size and
  \eqn{\lambda} in the original \code{s.list} and \code{lambda.list} (for \code{method = "sequential"})
  or in the iteration path (for \code{method = "gsection"}, \code{method = "pgsection"},
  and \code{method = "psequential"}) is returned.}
 
-\item{\dots}{additional print arguments}
+\item{\dots}{additional arguments}
 }
 \value{
-A matrix or vector containing the loglikelihood for each model is returned.
-For \code{bess} object fitted by \code{sequantial} method, values in each row in the
+A matrix or vector containing the log-likelihood for each model is returned.
+For \code{bess} objects fitted by \code{sequantial} method, values in each row in the
 returned matrix corresponding to the model size in \code{s.list}, and each column the shrinkage parameters
 in \code{lambda.list}.
 
-For \code{bess} object fitted by \code{gsection}, \code{pgsection} and \code{psequential}, the returned vector
-contains loglikelihood for fitted models in each iteration. The coefficients of those model can be extracted
+For \code{bess} objects fitted by \code{gsection}, \code{pgsection} and \code{psequential}, the returned vector
+contains log-likelihood for fitted models in each iteration. The coefficients of those model can be extracted
 from \code{beta.all} and \code{coef0.all} in the \code{bess} object.
 }
 \description{
-This function returns the loglikelihood for the fitted models.
+This function returns the log-likelihood for the fitted models.
 }
 \details{
-The loglikelihood for the best model chosen by a certain information criterion
+The log-likelihood for the best model chosen by a certain information criterion
 or cross-validation corresponding to the call in \code{bess} or the best models
 with model size and \eqn{\lambda} in the original \code{s.list} and \code{lambda.list}
-(or the in the iteration path)is returned.
+(or the in the iteration path) can be returned.
 For "lm" fits it is assumed that the scale has been estimated
  (by maximum likelihood or REML),
- and all the constants in the loglikelihood are included.
+ and all the constants in the log-likelihood are included.
 }
 \examples{
 

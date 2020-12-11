@@ -19,7 +19,7 @@ the \code{beta.all} of the \code{bess} object when screening is utilized in \cod
 \details{
 When screening is used, the active set updates are restricted on a chosen subset and the \code{beta.all}
  component of \code{bess} object contains only coefficients on this subset. This function helps recover
- the whole coeffients.
+ the whole coefficients.
 }
 \examples{
 
@@ -32,11 +32,7 @@ SNR <- 10
 cortype <- 1
 seed <- 10
 Data <- gen.data(n, p, k, rho, family = "gaussian", cortype = cortype, snr = SNR, seed = seed)
-x <- Data$x[1:140, ]
-y <- Data$y[1:140]
-x_new <- Data$x[141:200, ]
-y_new <- Data$y[141:200]
-lm.bss <- bess(x, y, method = "sequential")
+lm.bss <- bess(Data$x, Data$y, method = "sequential")
 
 recover(lm.bss)
 recover(lm.bss, best.model = FALSE)
@@ -49,7 +45,6 @@ Hazards Models, \emph{Journal of Statistical Software}, Vol. 94(4).
 doi:10.18637/jss.v094.i04.
 }
 \seealso{
-\code{\link{bess}}, \code{\link{plot.bess}},
 \code{\link{bess}}.
 }
 \author{

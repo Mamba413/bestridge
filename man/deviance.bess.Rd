@@ -15,7 +15,7 @@ If \code{best.model = FALSE}, the loglikelihood of the best models with model si
  or in the iteration path (for \code{method = "gsection"}, \code{method = "pgsection"},
  and \code{method = "psequential"}) is returned.}
 
-\item{\dots}{additional print arguments}
+\item{\dots}{additional arguments}
 }
 \value{
 A matrix or vector containing the deviance for each model is returned.
@@ -28,9 +28,6 @@ contains deviance for fitted models in each iteration. The coefficients of those
 from \code{beta.all} and \code{coef0.all} in the \code{bess} object.
 }
 \description{
-Print the primary elements of the "\code{bess}" object.
-}
-\details{
 Similar to other deviance methods, which returns deviance from a fitted "\code{bess.one}" object.
 }
 \examples{

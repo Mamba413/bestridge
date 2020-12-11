@@ -23,7 +23,6 @@ prints the fitted model and returns it invisibly.
 }
 \examples{
 
-
 # Generate simulated data
 n = 200
 p = 20

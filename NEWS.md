@@ -1,6 +1,6 @@
 # BeSS 1.0.0
 
-## Improvments
+## Improvements
 
 - The majority of code in the package is now written in C++ for fast implementation, 
 in which linear algebra is supported by the Eigen3 library for portable, high-performance computation. 

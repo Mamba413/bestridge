@@ -124,6 +124,7 @@ gen.data <- function(n, p, k = NULL, rho = 0, family = c("gaussian", "binomial",
     eta <- exp(eta)
     y <- rpois(n, eta)
   }
+  set.seed(NULL)
   return(list(x = x, y = y, Tbeta = Tbeta))
 }
 

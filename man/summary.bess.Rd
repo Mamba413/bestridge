@@ -36,7 +36,7 @@ summary(lm.bsrr)
 
 #-------------------group selection----------------------#
 beta <- rep(c(rep(1,2),rep(0,3)), 4)
-Data <- gen.data(n, p, rho=0.4, beta = beta, snr = 100, seed =10)
+Data <- gen.data(200, 20, 5, rho=0.4, beta = beta, snr = 100, seed =10)
 
 group.index <- c(rep(1, 2), rep(2, 3), rep(3, 2), rep(4, 3),
                 rep(5, 2), rep(6, 3), rep(7, 2), rep(8, 3))

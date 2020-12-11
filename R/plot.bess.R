@@ -46,12 +46,12 @@
 #'@export plot.bess
 plot.bess<-function(x, type = c("loss", "tune", "coefficients","both"), breaks = TRUE, K = NULL, sign.lambda = 0, ...)
 {
-  if(x$bess.one) stop("Plots for object from bess.one are not available.")
+  if(!is.null(x$bess.one)) stop("Plots for object from bess.one are not available.")
   if(x$algorithm_type == "GPDAS" | x$algorithm_type == "GL0L2") stop("Plots for group selection are not available now.")
   if(x$algorithm_type == "PDAS"){
     type <- match.arg(type)
     # s.list=x$s.list
-    df_list <- apply(matrix(unlist(x$beta.all), nrow = nrow(x$beta.all), byrow = F), 2, function(x){sum(ifelse(abs(x) < 1e-6, 0, 1))})
+
 
     if(is.null(K))  K <- length(which(x$beta!=0))#K<-df_list[length(df_list)]
     # if(x$family=="gaussian") dev=x$mse else dev=x$deviance
@@ -74,13 +74,18 @@ plot.bess<-function(x, type = c("loss", "tune", "coefficients","both"), breaks =
         dev <- unlist(x$ic.all)
       }
     }
-
-    beta.all <- matrix(unlist(x$beta.all), nrow = nrow(x$beta.all), byrow = F)
+    if(x$method == "sequential"){
+      beta.all <- x$beta.all[[1]]
+    } else{
+      beta.all <- x$beta.all
+    }
+    #beta.all <- matrix(unlist(x$beta.all), nrow = nrow(x$beta.all), byrow = F)
+    df_list <- apply(beta.all, 2, function(x){sum(ifelse(abs(x) < 1e-6, 0, 1))})
     df_order <- order(df_list)
     df_list <- df_list[df_order]
     dev <- dev[df_order]
     beta.all <- beta.all[,df_order]
-    beta.all <- cbind(rep(0,nrow(x$beta.all)), beta.all)
+    beta.all <- cbind(rep(0,nrow(beta.all)), beta.all)
 
     if(type=="loss" | type == "tune")
     {

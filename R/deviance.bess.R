@@ -29,9 +29,8 @@ NULL
 
 #' Extract the deviance from a "bess.one" object.
 #'
-#' Print the primary elements of the "\code{bess}" object.
-#'
 #' Similar to other deviance methods, which returns deviance from a fitted "\code{bess.one}" object.
+#'
 #'
 #' @param object A "\code{bess}" object.
 #' @param best.model Whether only return the loglikelihood of the best model. Default is \code{TRUE}.
@@ -47,7 +46,7 @@ NULL
 #' For \code{bess} object fitted by \code{gsection}, \code{pgsection} and \code{psequential}, the returned vector
 #' contains deviance for fitted models in each iteration. The coefficients of those model can be extracted
 #' from \code{beta.all} and \code{coef0.all} in the \code{bess} object.
-#' @param \dots additional print arguments
+#' @param \dots additional arguments
 #' @author Canhong Wen, Aijun Zhang, Shijie Quan, Liyuan Hu, Kangkang Jiang, Yanhang Zhang, Jin Zhu and Xueqin Wang.
 #' @seealso \code{\link{bess}}, \code{\link{plot.bess}},
 #' \code{\link{summary.bess}}.
@@ -73,7 +72,7 @@ NULL
 #'@method deviance bess
 #' @export
 
-deviance.bess =function(object, best.model=TRUE,...)
+deviance.bess <- function(object, best.model = TRUE,...)
 {
   n=object$nsample
   if(best.model){

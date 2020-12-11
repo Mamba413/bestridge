@@ -105,12 +105,12 @@ is \code{TRUE}.}
 
 \item{group.index}{A vector of integers indicating the which group each variable is in.
 For variables in the same group, they should be located in adjacent columns of \code{x}
-and their coorespinding index in \code{group.index} should be the same.
+and their corresponding index in \code{group.index} should be the same.
 Denote the first group as \code{1}, the second \code{2}, etc.
 If you do not fit a model with a group structure,
 please set \code{group.index = NULL}. Default is \code{NULL}.}
 
-\item{seed}{seed to be used to devide the sample into K cross-validation folds. Default is \code{NULL}.}
+\item{seed}{Seed to be used to devide the sample into K cross-validation folds. Default is \code{NULL}.}
 }
 \value{
 A list with class attribute 'bess' and named components:
@@ -123,42 +123,56 @@ cross-validated error for the best fitting model when model selection is
 based on the cross-validation.}
 
 \item{lambda}{The lambda chosen for the best fitting model}
-\item{beta.all}{A list of the best fitting coefficients of size
+\item{beta.all}{For \code{bess} objects obstained by \code{gsection}, \code{pgsection}
+and \code{psequential}, \code{beta.all} is a matrix with each column be the coefficients
+of the model in each iterative step in the tuning path.
+For \code{bess} objects obtained by \code{sequential} method,
+A list of the best fitting coefficients of size
 \code{s=0,1,...,p} and \eqn{\lambda} in \code{lambda.list} with the
-smallest loss function. For \code{"bess"} object obtained by \code{"bsrr"}, the fitting coefficients of the
+smallest loss function. For \code{"bess"} objects of \code{"bsrr"} type, the fitting coefficients of the
 \eqn{i^{th} \lambda} and the \eqn{j^{th}} \code{s} are at the \eqn{i^{th}}
 list component's \eqn{j^{th}} column. When screening is used, the active set updates are
  restricted on a chosen subset and the \code{beta.all}
- component of \code{bess} object contains only coefficients on this subset. To recover the orginal coefficients,
- see \code{\link{recover.beta}}.}
-\item{coef0.all}{The best fitting
+ component of \code{bess} object contains only coefficients on this subset. To recover the original coefficients,
+ see \code{\link{recover}}.}
+\item{coef0.all}{For \code{bess} objects obetained from \code{gsection}, \code{pgsection} and \code{psequential},
+\code{coef0.all} contains the intercept for the model in each iterative step in the tuning path.
+For \code{bess} objects obatined from \code{sequential} path,
+\code{coef0.all} contains the best fitting
 intercepts of size \eqn{s=0,1,\dots,p} and \eqn{\lambda} in
 \code{lambda.list} with the smallest loss function.}
-\item{loss.all}{A
-list of the training loss the best fitting intercepts of model size
+\item{loss.all}{For \code{bess} objects obetained from \code{gsection}, \code{pgsection} and \code{psequential},
+\code{loss.all} contains the training loss of the model in each iterative step in the tuning path.
+For \code{bess} objects obatined from \code{sequential} path, this is a
+list of the training loss of the best fitting intercepts of model size
 \eqn{s=0,1,\dots,p} and \eqn{\lambda} in \code{lambda.list}. For \code{"bess"} object obtained by \code{"bsrr"},
 the training loss of the \eqn{i^{th} \lambda} and the \eqn{j^{th}} \code{s}
 is at the \eqn{i^{th}} list component's \eqn{j^{th}} entry.}
-\item{ic.all}{A
+\item{ic.all}{For \code{bess} objects obetained from \code{gsection}, \code{pgsection} and \code{psequential},
+\code{ic.all} contains the values of the chosen information criterion of the model in each iterative step in the tuning path.
+For \code{bess} objects obatined from \code{sequential} path, this is a
 matrix of the values of the chosen information criterion of model size \eqn{s=0,1,\dots,p}
 and \eqn{\lambda} in \code{lambda.list} with the smallest loss function. For \code{"bess"} object obtained by \code{"bsrr"},
 the training loss of the \eqn{i^{th} \lambda} and the \eqn{j^{th}}
 \code{s} is at the \eqn{i^{th}} row \eqn{j^{th}} column. Only available when
 model selection is based on a certain information criterion.}
 
-\item{cvm.all}{A matrix of the mean cross-validation error of model size
+\item{cvm.all}{For \code{bess} objects obetained from \code{gsection}, \code{pgsection} and \code{psequential},
+\code{cvm.all} contains the mean cross-validation error of the model in each iterative step in the tuning path.
+For \code{bess} objects obatined from \code{sequential} path, this is a
+ matrix of the mean cross-validation error of model size
 \eqn{s=0,1,\dots,p} and \eqn{\lambda} in \code{lambda.list} with the
 smallest loss function. For \code{"bess"} object obtained by \code{"bsrr"}, the training loss of the \eqn{i^{th}
 \lambda} and the \eqn{j^{th}} \code{s} is at the \eqn{i^{th}} row
 \eqn{j^{th}} column. Only available when model selection is based on the
 cross-validation.}
-\item{lambda_all}{The lambda chosen for each step.}
+\item{lambda.all}{The lambda chosen for each step in \code{pgsection} and \code{psequential}.}
 \item{family}{Type of the model.}
 \item{s.list}{The input
 \code{s.list}.} \item{nsample}{The sample size.}
 \item{type}{Either \code{"bss"} or \code{"bsrr"}.}
 \item{method}{Method used for tuning parameters selection.}
-\item{ic_type}{The criterion of model selection.}
+\item{ic.type}{The criterion of model selection.}
 }
 \description{
 Best subset selection for generalized linear model and Cox's proportional
@@ -224,16 +238,15 @@ plot(lm.bss, type = "both", breaks = TRUE)
 plot(lm.bsrr)
 #-------------------logistic model----------------------#
 #Generate simulated data
-Data = gen.data(n, p, k, rho, family = "binomial", cortype = cortype, snr = SNR, seed = seed)
+Data <- gen.data(n, p, k, rho, family = "binomial", cortype = cortype, snr = SNR, seed = seed)
 
 x <- Data$x[1:140, ]
 y <- Data$y[1:140]
 x_new <- Data$x[141:200, ]
 y_new <- Data$y[141:200]
-logi.bss <- bess(x, y, family = "binomial", method = "sequential", tune = "cv")
+logi.bss <- bess(x, y, family = "binomial")
 lambda.list <- exp(seq(log(5), log(0.1), length.out = 10))
-logi.bsrr <- bess(x, y, type = "bsrr", tune="cv",
-                 family = "binomial", lambda.list = lambda.list, method = "sequential")
+logi.bsrr <- bess(x, y, type = "bsrr", family = "binomial", lambda.list = lambda.list)
 coef(logi.bss)
 coef(logi.bsrr)
 print(logi.bss)
@@ -271,9 +284,18 @@ plot(cox.bss, type = "both", breaks = TRUE)
 plot(cox.bsrr)
 
 #----------------------High dimensional linear models--------------------#
+p <- 1000
+data <- gen.data(n, p, k, family = "gaussian", cortype = cortype, snr = SNR, seed = seed)
+
+# Best subset selection with SIS screening
+lm.high <- bess(data$x, data$y, screening.num = 100)
+
+# To recover the coefficients in beta.all, use function recover
+beta.all <- recover(lm.high)
+
 #-------------------group selection----------------------#
 beta <- rep(c(rep(1,2),rep(0,3)), 4)
-Data <- gen.data(n, p, rho=0.4, beta = beta, snr = 100, seed =10)
+Data <- gen.data(200, 20, 5, rho=0.4, beta = beta, snr = 100, seed =10)
 x <- Data$x
 y <- Data$y
 
@@ -297,8 +319,8 @@ Hazards Models, \emph{Journal of Statistical Software}, Vol. 94(4).
 doi:10.18637/jss.v094.i04.
 }
 \seealso{
-\code{\link{plot.bess}}, \code{\link{summary.bess}}, \code{\link{recover.beta}},
-\code{\link{coef.bess}}, \code{\link{predict.bess}}.
+\code{\link{plot.bess}}, \code{\link{summary.bess}}, \code{\link{recover}},
+\code{\link{coef.bess}}, \code{\link{predict.bess}}, \code{\link{bess.one}}.
 }
 \author{
 Canhong Wen, Aijun Zhang, Shijie Quan, Liyuan Hu, Kangkang Jiang, Yanhang Zhang, Jin Zhu and Xueqin Wang.

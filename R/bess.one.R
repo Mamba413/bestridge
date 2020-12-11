@@ -11,11 +11,11 @@
 #'\deqn{\min_\beta -2 logL(\beta) + \lambda \Vert\beta \Vert_2^2; { s.t.} \|\beta\|_0 = s.}
 #'
 #'In the GLM case, \eqn{logL(\beta)} is the log-likelihood function;
-#' In the Cox model, \eqn{logL(\beta)} is the log parital likelihood function.
+#' In the Cox model, \eqn{logL(\beta)} is the log partial likelihood function.
 #'
 #'The best subset selection problem is solved by the primal dual active set algorithm,
 #'see Wen et al. (2017) for details. This algorithm utilizes an active set updating strategy
-#'via primal and dual vairables and fits the sub-model by exploiting the fact that their
+#'via primal and dual variables and fits the sub-model by exploiting the fact that their
 #' support set are non-overlap and complementary.
 #'
 #' @param x Input matrix, of dimension \eqn{n \times p}; each row is an observation
@@ -29,18 +29,6 @@
 #' and \code{type = "bsrr"} for the best subset ridge regression.
 #' @param family One of the following models: \code{"gaussian"}, \code{"binomial"},
 #' \code{"poisson"}, or \code{"cox"}. Depending on the response.
-#' @param method The method to be used to select the optimal model size and \eqn{L_2} shrinkage. For
-#' \code{method = "sequential"}, we solve the best subset selection and the best subset ridge regression
-#' problem for each \code{s} in \code{1,2,...,s.max} and \eqn{\lambda} in \code{lambda.list}. For \code{method =
-#' "gsection"}, which is only valid for \code{type = "bss"},
-#' we solve the best subset selection problem with model size ranged between s.min and s.max,
-#' where the specific model size to be considered is determined by golden section. we
-#' solve the best subset selection problem with a range of non-continuous model
-#' sizes. For \code{method = "pgsection"} and \code{"psequential"}, the Powell method is used to
-#' solve the best subset ridge regression problem.
-#' @param tune The criterion for choosing the model size and \eqn{L_2} shrinkage
-#' parameters. Available options are \code{"gic"}, \code{"ebic"}, \code{"bic"}, \code{"aic"} and \code{"cv"}.
-#' Default is \code{"gic"}.
 #' @param s A specified model size
 #' @param lambda A shrinkage parameter for \code{"bsrr"}.
 #' @param screening.num Users can pre-exclude some irrelevant variables according to maximum marginal likelihood estimators before fitting a
@@ -58,16 +46,13 @@
 #' @param max.iter The maximum number of iterations in the bess function.
 #' In most of the case, only a few steps can guarantee the convergence. Default
 #' is \code{20}.
-#' @param warm.start Whether to use the last solution as a warm start. Default
-#' is \code{TRUE}.
-#' @param nfolds The number of folds in cross-validation. Default is \code{5}.
 #' @param group.index A vector of integers indicating the which group each variable is in.
 #' For variables in the same group, they should be located in adjacent columns of \code{x}
-#' and their coorespinding index in \code{group.index} should be the same.
+#' and their corresponding index in \code{group.index} should be the same.
 #' Denote the first group as \code{1}, the second \code{2}, etc.
 #' If you do not fit a model with a group structure,
 #' please set \code{group.index = NULL}. Default is \code{NULL}.
-#' @param seed seed to be used to devide the sample into K cross-validation folds. Default is \code{NULL}.
+#' @param seed Seed to be used to devide the sample into K cross-validation folds. Default is \code{NULL}.
 #' @return A list with class attribute 'bess' and named components:
 #' \item{beta}{The best fitting coefficients.} \item{coef0}{The best fitting
 #' intercept.}
@@ -78,7 +63,7 @@
 #' \item{nsample}{The sample size.}
 #' \item{type}{Either \code{"bss"} or \code{"bsrr"}.}
 #' @author Canhong Wen, Aijun Zhang, Shijie Quan, Liyuan Hu, Kangkang Jiang, Yanhang Zhang, Jin Zhu and Xueqin Wang.
-#' @seealso \code{\link{plot.bess}}, \code{\link{summary.bess}}, \code{\link{recover.beta}},
+#' @seealso \code{\link{bess}}, \code{\link{summary.bess}}
 #' \code{\link{coef.bess}}, \code{\link{predict.bess}}.
 #' @references Wen, C., Zhang, A., Quan, S. and Wang, X. (2020). BeSS: An R
 #' Package for Best Subset Selection in Linear, Logistic and Cox Proportional
@@ -113,14 +98,14 @@
 #'
 #' #-------------------logistic model----------------------#
 #' #Generate simulated data
-#' Data = gen.data(n, p, k, rho, family = "binomial", cortype = cortype, snr = SNR, seed = seed)
+#' Data <- gen.data(n, p, k, rho, family = "binomial", cortype = cortype, snr = SNR, seed = seed)
 #'
 #' x <- Data$x[1:140, ]
 #' y <- Data$y[1:140]
 #' x_new <- Data$x[141:200, ]
 #' y_new <- Data$y[141:200]
 #' logi.bss <- bess.one(x, y, family = "binomial", s = 5)
-#' logi.bsrr <- bess(x, y, type = "bsrr", family = "binomial", s = 5, lambda = 0.01)
+#' logi.bsrr <- bess.one(x, y, type = "bsrr", family = "binomial", s = 5, lambda = 0.01)
 #' coef(logi.bss)
 #' coef(logi.bsrr)
 #' print(logi.bss)
@@ -138,8 +123,8 @@
 #' y <- Data$y[1:140, ]
 #' x_new <- Data$x[141:200, ]
 #' y_new <- Data$y[141:200, ]
-#' cox.bss <- bess(x, y, family = "cox", s = 5)
-#' cox.bsrr <- bess(x, y, type = "bsrr", family = "cox", s = 5, lambda = 0.01)
+#' cox.bss <- bess.one(x, y, family = "cox", s = 5)
+#' cox.bsrr <- bess.one(x, y, type = "bsrr", family = "cox", s = 5, lambda = 0.01)
 #' coef(cox.bss)
 #' coef(cox.bsrr)
 #' print(cox.bss)
@@ -149,22 +134,22 @@
 #' pred.bss <- predict(cox.bss, newx = x_new)
 #' pred.bsrr <- predict(cox.bsrr, newx = x_new)
 #'#----------------------High dimensional linear models--------------------#
-#` p <- 1000
-#` data <- gen.data(n, p, family = "gaussian", cortype = cortype, snr = SNR, seed = seed)
-#`
-#` # Best subset selection with SIS screening
-#` fit <- bess.one(data$x, data$y, s= 10, screening.num = 100)
-#`
+#' p <- 1000
+#' data <- gen.data(n, p, k, family = "gaussian", cortype = cortype, snr = SNR, seed = seed)
+#'
+#'# Best subset selection with SIS screening
+#' fit <- bess.one(data$x, data$y, screening.num = 100, s = 5)
+#'
 #'#-------------------group selection----------------------#
 #'beta <- rep(c(rep(1,2),rep(0,3)), 4)
-#'Data <- gen.data(n, p, rho=0.4, beta = beta, snr = 100, seed =10)
+#'Data <- gen.data(200, 20, 5, rho=0.4, beta = beta, snr = 100, seed =10)
 #'x <- Data$x
 #'y <- Data$y
 #'
 #'group.index <- c(rep(1, 2), rep(2, 3), rep(3, 2), rep(4, 3),
 #'                 rep(5, 2), rep(6, 3), rep(7, 2), rep(8, 3))
-#'lm.group <- bess(x, y, s.min=1, s.max = 8, type = "bss", group.index = group.index, s = 5)
-#'lm.groupbsrr <- bess(x, y, type = "bsrr", s = 5, lambda = 0.01, group.index = group.index)
+#'lm.group <- bess.one(x, y, s = 5, type = "bss", group.index = group.index)
+#'lm.groupbsrr <- bess.one(x, y, type = "bsrr", s = 5, lambda = 0.01, group.index = group.index)
 #'coef(lm.group)
 #'coef(lm.groupbsrr)
 #'print(lm.group)
@@ -181,10 +166,11 @@ bess.one <- function(x, y, family = c("gaussian", "binomial", "poisson", "cox"),
                              s, lambda= 0,
                              screening.num = NULL,
                              normalize = NULL, weight = NULL,
-                             max.iter = 20, warm.start = TRUE,
-                             nfolds = 5,
+                             max.iter = 20,
                              group.index =NULL,
                              seed=NULL){
+  if(length(s)>1) stop("bess.one needs only a single value for s.")
+  if(length(lambda) > 1) stop("bess.one needs only a single value for lambda.")
   family <- match.arg(family)
   type <- match.arg(type)
 
@@ -196,8 +182,8 @@ bess.one <- function(x, y, family = c("gaussian", "binomial", "poisson", "cox"),
                        lambda.min = lambda, lambda.max = lambda, nlambda = 1,
                        screening.num = screening.num,
                        normalize = normalize, weight = weight,
-                       max.iter = max.iter, warm.start = warm.start,
-                       nfolds = nfolds,
+                       max.iter = max.iter, warm.start = TRUE,
+                       nfolds = 5,
                        group.index =group.index,
                        seed=seed)
   res$s <- s

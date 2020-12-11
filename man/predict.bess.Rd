@@ -51,7 +51,7 @@ pred.bsrr <- predict(lm.bsrr, newx = x_new)
 
 #-------------------logistic model----------------------#
 #Generate simulated data
-Data = gen.data(n, p, k, rho, family = "binomial", cortype = cortype, snr = SNR, seed = seed)
+Data <- gen.data(n, p, k, rho, family = "binomial", cortype = cortype, snr = SNR, seed = seed)
 
 x <- Data$x[1:140, ]
 y <- Data$y[1:140]
@@ -82,7 +82,7 @@ pred.bsrr <- predict(cox.bsrr, newx = x_new)
 
 #-------------------group selection----------------------#
 beta <- rep(c(rep(1,2),rep(0,3)), 4)
-Data <- gen.data(n, p, rho=0.4, beta = beta, snr = 100, seed =10)
+Data <- gen.data(200, 20, 5, rho=0.4, beta = beta, snr = 100, seed =10)
 x <- Data$x
 y <- Data$y
 

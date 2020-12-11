@@ -43,7 +43,7 @@
 #'
 #' #-------------------logistic model----------------------#
 #' #Generate simulated data
-#' Data = gen.data(n, p, k, rho, family = "binomial", cortype = cortype, snr = SNR, seed = seed)
+#' Data <- gen.data(n, p, k, rho, family = "binomial", cortype = cortype, snr = SNR, seed = seed)
 #'
 #' x <- Data$x[1:140, ]
 #' y <- Data$y[1:140]
@@ -74,7 +74,7 @@
 #'
 #'#-------------------group selection----------------------#
 #'beta <- rep(c(rep(1,2),rep(0,3)), 4)
-#'Data <- gen.data(n, p, rho=0.4, beta = beta, snr = 100, seed =10)
+#'Data <- gen.data(200, 20, 5, rho=0.4, beta = beta, snr = 100, seed =10)
 #'x <- Data$x
 #'y <- Data$y
 #'
@@ -132,11 +132,9 @@ predict.bess <- function(object, newx, type = c("link", "response"), ...)
     #if(sum(is.infinite(exp(newx%*%betas+coef))) > 0) print(sum(is.infinite(exp(newx%*%betas+coef))))
     if(type  == "link"){
         link <- newx%*%betas+coef
-        print(link)
         return(drop(link))
     } else{
         prob <- ifelse(is.infinite(exp(newx%*%betas+coef)), 1, exp(newx%*%betas+coef)/(1+exp(newx%*%betas+coef)))
-        print(link)
         return(drop(prob))
     }
 

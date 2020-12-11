@@ -33,7 +33,7 @@
 #'
 #'#-------------------group selection----------------------#
 #' beta <- rep(c(rep(1,2),rep(0,3)), 4)
-#' Data <- gen.data(n, p, rho=0.4, beta = beta, snr = 100, seed =10)
+#' Data <- gen.data(200, 20, 5, rho=0.4, beta = beta, snr = 100, seed =10)
 #'
 #' group.index <- c(rep(1, 2), rep(2, 3), rep(3, 2), rep(4, 3),
 #'                 rep(5, 2), rep(6, 3), rep(7, 2), rep(8, 3))
@@ -59,18 +59,20 @@ summary.bess <-function(object, ...){
     df <- sum(object$beta != 0)
     predictors <- names(which(object$beta!=0))
     a <- rbind(predictors, object$beta[predictors])
-    cat("----------------------------------------------------------------------------------\n")
-    if(object$algorithm_type != "L0L2")
+    cat("-------------------------------------------------------------------------------------------\n")
+    if(object$algorithm_type != "L0L2" & object$algorithm_type != "GL0L2")
     {
-      cat("    Primal-dual active algorithm with tuning parameter determined by",object$method, "method", "\n\n")
+      method <- ifelse(object$method == "gsection", "golden section", "sequential")
+      cat("    Primal-dual active algorithm with tuning parameter determined by",method, "method", "\n\n")
     }else {
       if(object$method == "sequential"){
-        method = ifelse(object$method == "gsection", "golden section", "sequential")
+        method <- ifelse(object$method == "gsection", "golden section", "sequential")
         cat("    Penalized Primal-dual active algorithm", "\n")
         cat("    with tuning parameter determined by",method, "method", "\n\n")
       } else{
+        line.search <- ifelse(object$line.search == "gsection", "golden section", "sequential")
         cat("    Penalized Primal-dual active algorithm with tuning parameter determined by","\n")
-        cat("    powell method using",object$line.search,"method for line search","\n\n")
+        cat("    powell method using",line.search,"method for line search","\n\n")
       }
     }
     if(object$algorithm_type == "PDAS")
@@ -93,7 +95,7 @@ summary.bess <-function(object, ...){
       if(object$cvm >= 0)
         cat("    cv loss:          ", object$cvm,"\n") else cat("    cv loss:         ", object$cvm,"\n")
     }
-    cat("----------------------------------------------------------------------------------\n")
+    cat("-------------------------------------------------------------------------------------------\n")
   } else{
     df <- sum(object$beta != 0)
     predictors <- names(which(object$beta!=0))

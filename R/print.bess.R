@@ -17,7 +17,6 @@
 #' doi:10.18637/jss.v094.i04.
 #' @examples
 #'
-#'
 #' # Generate simulated data
 #' n = 200
 #' p = 20
