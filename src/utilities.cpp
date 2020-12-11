@@ -135,15 +135,30 @@ Eigen::MatrixXd X_seg(Eigen::MatrixXd& X, int n, Eigen::VectorXi& ind) {
   return X_new;
 }
 
-std::vector<Eigen::MatrixXd> Phi(Eigen::MatrixXd& X, Eigen::VectorXi index, Eigen::VectorXi gsize, int n, int p, int N, double lambda){
+std::vector<Eigen::MatrixXd> Phi(Eigen::MatrixXd& X, Eigen::VectorXi index, Eigen::VectorXi gsize, int n, int p, int N, double lambda, std::vector<Eigen::MatrixXd> group_XTX){
+//   cout<<"Phi"<<endl;
   std::vector<Eigen::MatrixXd> Phi(N);
   for (int i=0;i<N;i++) {
-    Eigen::MatrixXd X_ind = X.block(0, index(i), n, gsize(i));
-    Eigen::MatrixXd XtX = 2*lambda * Eigen::MatrixXd::Identity(gsize(i), gsize(i)) + (X_ind.transpose() * X_ind)/double(n);
-    XtX.sqrt().evalTo(Phi[i]);
+    Eigen::MatrixXd lambda_XtX = 2*lambda * Eigen::MatrixXd::Identity(gsize(i), gsize(i)) + group_XTX[i]/double(n);
+    lambda_XtX.sqrt().evalTo(Phi[i]);
   }
   return Phi;
 }
+
+std::vector<Eigen::MatrixXd> group_XTX(Eigen::MatrixXd& X, Eigen::VectorXi index, Eigen::VectorXi gsize, int n, int p, int N, int model_type){
+//   cout<<"group_XTX"<<endl;
+  std::vector<Eigen::MatrixXd> XTX(N); 
+  if(model_type == 1)
+  {
+    for (int i=0;i<N;i++) {
+    Eigen::MatrixXd X_ind = X.block(0, index(i), n, gsize(i));
+    XTX[i] = X_ind.transpose() * X_ind;
+    }
+  }
+  return XTX;
+}
+
+
 
 std::vector<Eigen::MatrixXd> invPhi(std::vector<Eigen::MatrixXd>& Phi, int N){
   std::vector<Eigen::MatrixXd> invPhi(N);
@@ -155,20 +170,6 @@ std::vector<Eigen::MatrixXd> invPhi(std::vector<Eigen::MatrixXd>& Phi, int N){
   return invPhi;
 }
 
-// increse
-// Eigen::VectorXi sort_vec(Eigen::VectorXi& vec){
-//   Eigen::VectorXi ind=Eigen::VectorXi::LinSpaced(vec.size(),0,vec.size()-1); //[0 1 2 3 ... N-1]
-//   auto rule=[vec](int i, int j)->bool{
-//     return vec(i)<vec(j);
-//   };// sort rule
-//   std::sort(ind.data(), ind.data() + ind.size(), rule);
-//   Eigen::VectorXi sorted_vec(vec.size());
-//   for(int i=0;i<vec.size();i++){
-//     sorted_vec(i)=vec(ind(i));
-//   }
-//   return sorted_vec;
-// }
-
 void max_k(Eigen::VectorXd& vec, int k, Eigen::VectorXi& result)
 {
     Eigen::VectorXi ind=Eigen::VectorXi::LinSpaced(vec.size(),0,vec.size()-1); //[0 1 2 3 ... N-1]
@@ -177,7 +178,17 @@ void max_k(Eigen::VectorXd& vec, int k, Eigen::VectorXi& result)
     };// sort rule
     std::nth_element(ind.data(), ind.data()+k, ind.data() + ind.size(), rule);
     std::sort(ind.data(), ind.data()+k);
-    for(int i=0;i<k;i++){
-        result(i)=ind(i);
+    result = ind.head(k).eval();
+}
+
+void slice_assignment(Eigen::VectorXd& nums, Eigen::VectorXi& ind, double value)
+{
+    if(ind.size() != 0)
+    {
+        for(int i=0;i<ind.size();i++)
+        {
+            nums(ind(i)) = value;
+        }
     }
 }
+

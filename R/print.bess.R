@@ -4,7 +4,7 @@
 #'
 #' prints the fitted model and returns it invisibly.
 #'
-#' @param x a "\code{bess}" object
+#' @param x A "\code{bess}" object.
 #' @param digits Minimum number of significant digits to be used.
 #' @param nonzero Whether the output should only contain the non-zero coefficients.
 #' @param \dots additional print arguments
@@ -26,14 +26,10 @@
 #' SNR = 10
 #' cortype = 1
 #' seed = 10
-#' Data = gen.data(n, p, k, rho, family = "gaussian", cortype=cortype, SNR=SNR, seed=seed)
-#' x = Data$x[1:140, ]
-#' y = Data$y[1:140]
-#' x_new = Data$x[141:200, ]
-#' y_new = Data$y[141:200]
-#' lm.bss = bess(x, y, method = "sequential")
+#' Data = gen.data(n, p, k, rho, family = "gaussian", cortype=cortype, snr=SNR, seed=seed)
+#' lm.bss = bess(Data$x, Data$y, method = "sequential")
 #' lambda.list = exp(seq(log(5), log(0.1), length.out = 10))
-#' lm.bsrr = bess(x, y, type = "bsrr", lambda.list = lambda.list, method = "sequential")
+#' lm.bsrr = bess(Data$x, Data$y, type = "bsrr", lambda.list = lambda.list, method = "sequential")
 #'
 #' print(lm.bss)
 #' print(lm.bsrr)

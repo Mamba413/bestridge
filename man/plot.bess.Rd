@@ -15,7 +15,7 @@ paths}
 )
 }
 \arguments{
-\item{x}{a \code{"bess"} object}
+\item{x}{A \code{"bess"} object.}
 
 \item{type}{One of \code{"loss"}, \code{"tune"}, \code{"coefficients"}, \code{"both"}. This option is only valid for \code{"bess"} object obtained from \code{"bss"}.
 If \code{type = "loss"} (\code{type = "tune"}), a path of loss function (corresponding information criterion or cross-validation loss) is provided.
@@ -45,14 +45,10 @@ rho <- 0.4
 SNR <- 10
 cortype <- 1
 seed <- 10
-Data <- gen.data(n, p, k, rho, family = "gaussian", cortype = cortype, SNR = SNR, seed = seed)
-x <- Data$x[1:140, ]
-y <- Data$y[1:140]
-x_new <- Data$x[141:200, ]
-y_new <- Data$y[141:200]
-lm.bss <- bess(x, y, method = "sequential")
+Data <- gen.data(n, p, k, rho, family = "gaussian", cortype = cortype, snr = SNR, seed = seed)
+lm.bss <- bess(Data$x, Data$y, method = "sequential")
 lambda.list <- exp(seq(log(5), log(0.1), length.out = 10))
-lm.bsrr <- bess(x, y, type = "bsrr", method = "pgsection")
+lm.bsrr <- bess(Data$x, Data$y, type = "bsrr", method = "pgsection")
 
 # generate plots
 plot(lm.bss, type = "both", breaks = TRUE)

@@ -7,7 +7,7 @@
 \method{summary}{bess}(object, ...)
 }
 \arguments{
-\item{object}{a "bess" object}
+\item{object}{A "bess" object.}
 
 \item{\dots}{additional print arguments}
 }
@@ -26,30 +26,33 @@ rho <- 0.4
 SNR <- 10
 cortype <- 1
 seed <- 10
-Data <- gen.data(n, p, k, rho, family = "gaussian", cortype = cortype, SNR = SNR, seed = seed)
-x <- Data$x[1:140, ]
-y <- Data$y[1:140]
-x_new <- Data$x[141:200, ]
-y_new <- Data$y[141:200]
-lm.bss <- bess(x, y, method = "sequential")
+Data <- gen.data(n, p, k, rho, family = "gaussian", cortype = cortype, snr = SNR, seed = seed)
+lm.bss <- bess(Data$x, Data$y, method = "sequential")
 lambda.list <- exp(seq(log(5), log(0.1), length.out = 10))
-lm.bsrr <- bess(x, y, type = "bsrr", method = "pgsection")
+lm.bsrr <- bess(Data$x, Data$y, type = "bsrr", method = "pgsection")
 
 summary(lm.bss)
 summary(lm.bsrr)
 
 #-------------------group selection----------------------#
 beta <- rep(c(rep(1,2),rep(0,3)), 4)
-Data <- gen.data(n, p, rho=0.4, beta = beta, SNR = 100, seed =10)
-x <- Data$x
-y <- Data$y
+Data <- gen.data(n, p, rho=0.4, beta = beta, snr = 100, seed =10)
 
-group.index <- c(1, 3, 6, 8, 11, 13, 16, 18)
-lm.group <- bess(x, y, s.min=1, s.max = 8, type = "bss", group.index = group.index)
-lm.groupbsrr <- bess(x, y, type = "bsrr", s.min = 1, s.max = 8, group.index = group.index)
+group.index <- c(rep(1, 2), rep(2, 3), rep(3, 2), rep(4, 3),
+                rep(5, 2), rep(6, 3), rep(7, 2), rep(8, 3))
+lm.group <- bess(Data$x, Data$y, s.min=1, s.max = 8, type = "bss", group.index = group.index)
+lm.groupbsrr <- bess(Data$x, Data$y, type = "bsrr", s.min = 1, s.max = 8, group.index = group.index)
 
 summary(lm.group)
 summary(lm.groupbsrr)
+
+#-------------------summary for bess.one----------------------#
+Data <- gen.data(n, p, k, rho, family = "gaussian", cortype = cortype, snr = SNR, seed = seed)
+lm.bss <- bess.one(Data$x, Data$y, s = 5)
+lm.bsrr <- bess.one(Data$x, Data$y, type = "bsrr", s = 5, lambda = 0.01)
+
+summary(lm.bss)
+summary(lm.bsrr)
 
 }
 \references{
