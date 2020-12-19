@@ -7,9 +7,9 @@
 bess(
   x,
   y,
-  family = "gaussian",
+  family = c("gaussian", "binomial", "poisson", "cox"),
   type = c("bss", "bsrr"),
-  method = "gsection",
+  method = c("gsection", "sequential", "pgsection", "psequential"),
   tune = c("gic", "ebic", "bic", "aic", "cv"),
   s.list,
   lambda.list = 0,
@@ -18,6 +18,7 @@ bess(
   lambda.min = 0.001,
   lambda.max = 100,
   nlambda = 100,
+  always.include = NULL,
   screening.num = NULL,
   normalize = NULL,
   weight = NULL,
@@ -77,7 +78,10 @@ round(n/log(n)))}.}
 \item{lambda.max}{The maximum value of lambda. Only used for \code{method =
 "powell"}. Default is \code{100}.}
 
-\item{nlambda}{The number of \eqn{\lambda}s for the Powell path with sequential line search method. Only valid for \code{method = "psequential"}.}
+\item{nlambda}{The number of \eqn{\lambda}s for the Powell path with sequential line search method.
+Only valid for \code{method = "psequential"}.}
+
+\item{always.include}{A vector containing the index of variables that should always be included in the model.}
 
 \item{screening.num}{Users can pre-exclude some irrelevant variables according to maximum marginal likelihood estimators before fitting a
 model by passing an integer to \code{screening.num} and the sure independence screening will choose a set of variables of this size.
@@ -90,7 +94,7 @@ only subtract the mean of columns of \code{x}.
 \code{normalize = 3} for subtracting the means of the columns of \code{x} and \code{y}, and also
 normalizing the columns of \code{x} to have \eqn{\sqrt n} norm.
 If \code{normalize = NULL}, by default, \code{normalize} will be set \code{1} for \code{"gaussian"},
-\code{2} for \code{"binomial"}, \code{3} for \code{"cox"}.}
+\code{2} for \code{"binomial"} and \code{"poisson"}, \code{3} for \code{"cox"}.}
 
 \item{weight}{Observation weights. Default is \code{1} for each observation.}
 
@@ -114,8 +118,10 @@ please set \code{group.index = NULL}. Default is \code{NULL}.}
 }
 \value{
 A list with class attribute 'bess' and named components:
-\item{beta}{The best fitting coefficients.} \item{coef0}{The best fitting
+\item{beta}{The best fitting coefficients.}
+ \item{coef0}{The best fitting
 intercept.}
+\item{bestmodel}{The best fitted model for \code{type = "bss"}, the class of which is \code{"lm"}, \code{"glm"} or \code{"coxph"}.}
 \item{loss}{The training loss of the best fitting model.}
 \item{ic}{The information criterion of the best fitting model when model
 selection is based on a certain information criterion.} \item{cvm}{The mean
@@ -123,7 +129,7 @@ cross-validated error for the best fitting model when model selection is
 based on the cross-validation.}
 
 \item{lambda}{The lambda chosen for the best fitting model}
-\item{beta.all}{For \code{bess} objects obstained by \code{gsection}, \code{pgsection}
+\item{beta.all}{For \code{bess} objects obtained by \code{gsection}, \code{pgsection}
 and \code{psequential}, \code{beta.all} is a matrix with each column be the coefficients
 of the model in each iterative step in the tuning path.
 For \code{bess} objects obtained by \code{sequential} method,
@@ -131,24 +137,21 @@ A list of the best fitting coefficients of size
 \code{s=0,1,...,p} and \eqn{\lambda} in \code{lambda.list} with the
 smallest loss function. For \code{"bess"} objects of \code{"bsrr"} type, the fitting coefficients of the
 \eqn{i^{th} \lambda} and the \eqn{j^{th}} \code{s} are at the \eqn{i^{th}}
-list component's \eqn{j^{th}} column. When screening is used, the active set updates are
- restricted on a chosen subset and the \code{beta.all}
- component of \code{bess} object contains only coefficients on this subset. To recover the original coefficients,
- see \code{\link{recover}}.}
-\item{coef0.all}{For \code{bess} objects obetained from \code{gsection}, \code{pgsection} and \code{psequential},
+list component's \eqn{j^{th}} column.}
+\item{coef0.all}{For \code{bess} objects obtainedfrom \code{gsection}, \code{pgsection} and \code{psequential},
 \code{coef0.all} contains the intercept for the model in each iterative step in the tuning path.
 For \code{bess} objects obatined from \code{sequential} path,
 \code{coef0.all} contains the best fitting
 intercepts of size \eqn{s=0,1,\dots,p} and \eqn{\lambda} in
 \code{lambda.list} with the smallest loss function.}
-\item{loss.all}{For \code{bess} objects obetained from \code{gsection}, \code{pgsection} and \code{psequential},
+\item{loss.all}{For \code{bess} objects obtainedfrom \code{gsection}, \code{pgsection} and \code{psequential},
 \code{loss.all} contains the training loss of the model in each iterative step in the tuning path.
 For \code{bess} objects obatined from \code{sequential} path, this is a
 list of the training loss of the best fitting intercepts of model size
 \eqn{s=0,1,\dots,p} and \eqn{\lambda} in \code{lambda.list}. For \code{"bess"} object obtained by \code{"bsrr"},
 the training loss of the \eqn{i^{th} \lambda} and the \eqn{j^{th}} \code{s}
 is at the \eqn{i^{th}} list component's \eqn{j^{th}} entry.}
-\item{ic.all}{For \code{bess} objects obetained from \code{gsection}, \code{pgsection} and \code{psequential},
+\item{ic.all}{For \code{bess} objects obtainedfrom \code{gsection}, \code{pgsection} and \code{psequential},
 \code{ic.all} contains the values of the chosen information criterion of the model in each iterative step in the tuning path.
 For \code{bess} objects obatined from \code{sequential} path, this is a
 matrix of the values of the chosen information criterion of model size \eqn{s=0,1,\dots,p}
@@ -157,7 +160,7 @@ the training loss of the \eqn{i^{th} \lambda} and the \eqn{j^{th}}
 \code{s} is at the \eqn{i^{th}} row \eqn{j^{th}} column. Only available when
 model selection is based on a certain information criterion.}
 
-\item{cvm.all}{For \code{bess} objects obetained from \code{gsection}, \code{pgsection} and \code{psequential},
+\item{cvm.all}{For \code{bess} objects obtainedfrom \code{gsection}, \code{pgsection} and \code{psequential},
 \code{cvm.all} contains the mean cross-validation error of the model in each iterative step in the tuning path.
 For \code{bess} objects obatined from \code{sequential} path, this is a
  matrix of the mean cross-validation error of model size
@@ -182,12 +185,12 @@ model.
 The best subset selection problem with model size \eqn{s} is
 \deqn{\min_\beta -2 \log L(\beta) \;\;{\rm s.t.}\;\; \|\beta\|_0 \leq s.} In
 the GLM case, \eqn{\log L(\beta)} is the log-likelihood function; In the Cox
-model, \eqn{logL(\beta)} is the log partial likelihood function.
+model, \eqn{\log L(\beta)} is the log partial likelihood function.
 
 The best ridge regression problem with model size \eqn{s} is
-\deqn{\min_\beta -2 logL(\beta) + \lambda\Vert\beta\Vert_2^2 \;\;{\rm
-s.t.}\;\; \|\beta\|_0 \leq s.} In the GLM case, \eqn{logL(\beta)} is the
-log-likelihood function; In the Cox model, \eqn{logL(\beta)} is the log
+\deqn{\min_\beta -2 \log L(\beta) + \lambda\Vert\beta\Vert_2^2 \;\;{\rm
+s.t.}\;\; \|\beta\|_0 \leq s.} In the GLM case, \eqn{\log L(\beta)} is the
+log likelihood function; In the Cox model, \eqn{\log L(\beta)} is the log
 partial likelihood function.
 
 For each candidate model size and \eqn{\lambda}, the best subset selection and the best subset ridge regression
@@ -213,15 +216,15 @@ n <- 200
 p <- 20
 k <- 5
 rho <- 0.4
-SNR <- 10
-cortype <- 1
 seed <- 10
-Data <- gen.data(n, p, k, rho, family = "gaussian", cortype = cortype, snr = SNR, seed = seed)
+Tbeta <- rep(0, p)
+Tbeta[1:k*floor(p/k):floor(p/k)] <- rep(1, k)
+Data <- gen.data(n, p, k, rho, family = "gaussian", beta = Tbeta, seed = seed)
 x <- Data$x[1:140, ]
 y <- Data$y[1:140]
 x_new <- Data$x[141:200, ]
 y_new <- Data$y[141:200]
-lm.bss <- bess(x, y, method = "sequential")
+lm.bss <- bess(x, y)
 lambda.list <- exp(seq(log(5), log(0.1), length.out = 10))
 lm.bsrr <- bess(x, y, type = "bsrr", method = "pgsection")
 coef(lm.bss)
@@ -238,7 +241,7 @@ plot(lm.bss, type = "both", breaks = TRUE)
 plot(lm.bsrr)
 #-------------------logistic model----------------------#
 #Generate simulated data
-Data <- gen.data(n, p, k, rho, family = "binomial", cortype = cortype, snr = SNR, seed = seed)
+Data <- gen.data(n, p, k, rho, family = "binomial", beta = Tbeta, seed = seed)
 
 x <- Data$x[1:140, ]
 y <- Data$y[1:140]
@@ -259,15 +262,38 @@ pred.bsrr <- predict(logi.bsrr, newx = x_new)
 # generate plots
 plot(logi.bss, type = "both", breaks = TRUE)
 plot(logi.bsrr)
+#-------------------poisson model----------------------#
+Data <- gen.data(n, p, k, rho=0.3, family = "poisson", beta = Tbeta, seed = seed)
+
+x <- Data$x[1:140, ]
+y <- Data$y[1:140]
+x_new <- Data$x[141:200, ]
+y_new <- Data$y[141:200]
+poi.bss <- bess(x, y, family = "poisson")
+lambda.list <- exp(seq(log(5), log(0.1), length.out = 10))
+poi.bsrr <- bess(x, y, type = "bsrr",
+                 family = "poisson", lambda.list = lambda.list)
+coef(poi.bss)
+coef(poi.bsrr)
+print(poi.bss)
+print(poi.bsrr)
+summary(poi.bss)
+summary(poi.bsrr)
+pred.bss <- predict(poi.bss, newx = x_new)
+pred.bsrr <- predict(poi.bsrr, newx = x_new)
+
+# generate plots
+plot(poi.bss, type = "both", breaks = TRUE)
+plot(poi.bsrr)
 #-------------------coxph model----------------------#
 #Generate simulated data
-Data <- gen.data(n, p, k, rho, family = "cox", scal = 10)
+Data <- gen.data(n, p, k, rho, family = "cox", scal = 10, beta = Tbeta)
 
 x <- Data$x[1:140, ]
 y <- Data$y[1:140, ]
 x_new <- Data$x[141:200, ]
 y_new <- Data$y[141:200, ]
-cox.bss <- bess(x, y, family = "cox", method = "sequential")
+cox.bss <- bess(x, y, family = "cox")
 lambda.list <- exp(seq(log(5), log(0.1), length.out = 10))
 cox.bsrr <- bess(x, y, type = "bsrr", family = "cox", lambda.list = lambda.list)
 coef(cox.bss)
@@ -284,18 +310,16 @@ plot(cox.bss, type = "both", breaks = TRUE)
 plot(cox.bsrr)
 
 #----------------------High dimensional linear models--------------------#
-p <- 1000
-data <- gen.data(n, p, k, family = "gaussian", cortype = cortype, snr = SNR, seed = seed)
+\dontrun{
+data <- gen.data(n, p = 1000, k, family = "gaussian", seed = seed)
 
 # Best subset selection with SIS screening
 lm.high <- bess(data$x, data$y, screening.num = 100)
-
-# To recover the coefficients in beta.all, use function recover
-beta.all <- recover(lm.high)
+}
 
 #-------------------group selection----------------------#
 beta <- rep(c(rep(1,2),rep(0,3)), 4)
-Data <- gen.data(200, 20, 5, rho=0.4, beta = beta, snr = 100, seed =10)
+Data <- gen.data(200, 20, 5, rho=0.4, beta = beta, seed =10)
 x <- Data$x
 y <- Data$y
 
@@ -311,6 +335,41 @@ print(lm.groupbsrr)
 summary(lm.groupbsrr)
 pred.group <- predict(lm.group, newx = x_new)
 pred.groupl0l2 <- predict(lm.groupbsrr, newx = x_new)
+#-------------------include specified variables----------------------#
+Data <- gen.data(n, p, k, rho, family = "gaussian", beta = Tbeta, seed = seed)
+lm.bss <- bess(Data$x, Data$y, always.include = 2)
+
+\dontrun{
+#-------------------trim32 data analysis in doi: 10.18637/jss.v094.i04----------------------#
+# import trim32 data by:
+load(url('https://github.com/Mamba413/bess/tree/master/data/trim32.RData'))
+# or manually downloading trim32.RData in the github page:
+# "https://github.com/Mamba413/bess/tree/master/data/" and read it by:
+load('trim32.RData')
+
+X <- trim32$x
+Y <- trim32$y
+dim(X)
+
+# running bess with argument method = "sequential".
+fit.seq <- bess(X, Y, method = "sequential")
+summary(fit.seq)
+
+# the bess function outputs an 'lm' type of object bestmodel associated
+# with the selected best model
+bm.seq <- fit.seq$bestmodel
+summary(bm.seq)
+pred.seq <- predict(fit.seq, newdata = data$x)
+plot(fit.seq, type = "both", breaks = TRUE)
+
+# We now call the function bess with argument method = "gsection"
+fit.gs <- bess(X, Y, family = "gaussian", method = "gsection")
+bm.gs <- fit.gs$bestmodel
+summary(bm.gs)
+beta <- coef(fit.gs, sparse = TRUE)
+class(beta)
+pred.gs <- predict(fit.gs, newdata = X)
+}
 }
 \references{
 Wen, C., Zhang, A., Quan, S. and Wang, X. (2020). BeSS: An R
@@ -319,7 +378,7 @@ Hazards Models, \emph{Journal of Statistical Software}, Vol. 94(4).
 doi:10.18637/jss.v094.i04.
 }
 \seealso{
-\code{\link{plot.bess}}, \code{\link{summary.bess}}, \code{\link{recover}},
+\code{\link{plot.bess}}, \code{\link{summary.bess}},
 \code{\link{coef.bess}}, \code{\link{predict.bess}}, \code{\link{bess.one}}.
 }
 \author{

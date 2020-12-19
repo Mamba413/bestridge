@@ -12,12 +12,12 @@ bess.one(
   type = c("bss", "bsrr"),
   s,
   lambda = 0,
+  always.include = NULL,
   screening.num = NULL,
   normalize = NULL,
   weight = NULL,
   max.iter = 20,
-  group.index = NULL,
-  seed = NULL
+  group.index = NULL
 )
 }
 \arguments{
@@ -40,6 +40,8 @@ and \code{type = "bsrr"} for the best subset ridge regression.}
 
 \item{lambda}{A shrinkage parameter for \code{"bsrr"}.}
 
+\item{always.include}{A vector containing the index of variables that should always be included in the model.}
+
 \item{screening.num}{Users can pre-exclude some irrelevant variables according to maximum marginal likelihood estimators before fitting a
 model by passing an integer to \code{screening.num} and the sure independence screening will choose a set of variables of this size.
 Then the active set updates are restricted on this subset.}
@@ -51,7 +53,7 @@ only subtract the mean of columns of \code{x}.
 \code{normalize = 3} for subtracting the means of the columns of \code{x} and \code{y}, and also
 normalizing the columns of \code{x} to have \eqn{\sqrt n} norm.
 If \code{normalize = NULL}, by default, \code{normalize} will be set \code{1} for \code{"gaussian"},
-\code{2} for \code{"binomial"}, \code{3} for \code{"cox"}.}
+\code{2} for \code{"binomial"} and \code{"poisson"}, \code{3} for \code{"cox"}.}
 
 \item{weight}{Observation weights. Default is \code{1} for each observation.}
 
@@ -65,8 +67,6 @@ and their corresponding index in \code{group.index} should be the same.
 Denote the first group as \code{1}, the second \code{2}, etc.
 If you do not fit a model with a group structure,
 please set \code{group.index = NULL}. Default is \code{NULL}.}
-
-\item{seed}{Seed to be used to devide the sample into K cross-validation folds. Default is \code{NULL}.}
 }
 \value{
 A list with class attribute 'bess' and named components:
@@ -85,13 +85,13 @@ linear models and Cox's proportional hazard model.
 }
 \details{
 Given a model size \eqn{s}, we consider the following best subset selection problem:
-\deqn{\min_\beta -2 logL(\beta) ;{ s.t.} \|\beta\|_0 = s.}
+\deqn{\min_\beta -2 \log L(\beta) ;{ s.t.} \|\beta\|_0 = s.}
 And given a model size \eqn{s} and a shrinkage parameter \eqn{\lambda}
 , consider the following best subset ridge regression problem:
-\deqn{\min_\beta -2 logL(\beta) + \lambda \Vert\beta \Vert_2^2; { s.t.} \|\beta\|_0 = s.}
+\deqn{\min_\beta -2 \log L(\beta) + \lambda \Vert\beta \Vert_2^2; { s.t.} \|\beta\|_0 = s.}
 
-In the GLM case, \eqn{logL(\beta)} is the log-likelihood function;
-In the Cox model, \eqn{logL(\beta)} is the log partial likelihood function.
+In the GLM case, \eqn{\log L(\beta)} is the log likelihood function;
+In the Cox model, \eqn{\log L(\beta)} is the log partial likelihood function.
 
 The best subset selection problem is solved by the primal dual active set algorithm,
 see Wen et al. (2017) for details. This algorithm utilizes an active set updating strategy
@@ -106,10 +106,10 @@ n <- 200
 p <- 20
 k <- 5
 rho <- 0.4
-SNR <- 10
-cortype <- 1
 seed <- 10
-Data <- gen.data(n, p, k, rho, family = "gaussian", cortype = cortype, snr = SNR, seed = seed)
+Tbeta <- rep(0, p)
+Tbeta[1:k*floor(p/k):floor(p/k)] <- rep(1, k)
+Data <- gen.data(n, p, k, rho, family = "gaussian", beta = Tbeta, seed = seed)
 x <- Data$x[1:140, ]
 y <- Data$y[1:140]
 x_new <- Data$x[141:200, ]
@@ -127,7 +127,7 @@ pred.bsrr <- predict(lm.bsrr, newx = x_new)
 
 #-------------------logistic model----------------------#
 #Generate simulated data
-Data <- gen.data(n, p, k, rho, family = "binomial", cortype = cortype, snr = SNR, seed = seed)
+Data <- gen.data(n, p, k, rho, family = "binomial", beta = Tbeta, seed = seed)
 
 x <- Data$x[1:140, ]
 y <- Data$y[1:140]
@@ -144,9 +144,28 @@ summary(logi.bsrr)
 pred.bss <- predict(logi.bss, newx = x_new)
 pred.bsrr <- predict(logi.bsrr, newx = x_new)
 
+#-------------------poisson model----------------------#
+Data <- gen.data(n, p, k, rho=0.3, family = "poisson", beta = Tbeta, seed = seed)
+
+x <- Data$x[1:140, ]
+y <- Data$y[1:140]
+x_new <- Data$x[141:200, ]
+y_new <- Data$y[141:200]
+poi.bss <- bess.one(x, y, family = "poisson", s=5)
+lambda.list <- exp(seq(log(5), log(0.1), length.out = 10))
+poi.bsrr <- bess.one(x, y, type = "bsrr", family = "poisson", s = 5, lambda = 0.01)
+coef(poi.bss)
+coef(poi.bsrr)
+print(poi.bss)
+print(poi.bsrr)
+summary(poi.bss)
+summary(poi.bsrr)
+pred.bss <- predict(poi.bss, newx = x_new)
+pred.bsrr <- predict(poi.bsrr, newx = x_new)
+
 #-------------------coxph model----------------------#
 #Generate simulated data
-Data <- gen.data(n, p, k, rho, family = "cox", scal = 10)
+Data <- gen.data(n, p, k, rho, family = "cox", beta = Tbeta, scal = 10)
 
 x <- Data$x[1:140, ]
 y <- Data$y[1:140, ]
@@ -163,15 +182,16 @@ summary(cox.bsrr)
 pred.bss <- predict(cox.bss, newx = x_new)
 pred.bsrr <- predict(cox.bsrr, newx = x_new)
 #----------------------High dimensional linear models--------------------#
-p <- 1000
-data <- gen.data(n, p, k, family = "gaussian", cortype = cortype, snr = SNR, seed = seed)
+\dontrun{
+data <- gen.data(n, p = 1000, k, family = "gaussian", seed = seed)
 
 # Best subset selection with SIS screening
 fit <- bess.one(data$x, data$y, screening.num = 100, s = 5)
+}
 
 #-------------------group selection----------------------#
 beta <- rep(c(rep(1,2),rep(0,3)), 4)
-Data <- gen.data(200, 20, 5, rho=0.4, beta = beta, snr = 100, seed =10)
+Data <- gen.data(200, 20, 5, rho=0.4, beta = beta, seed =10)
 x <- Data$x
 y <- Data$y
 
@@ -183,11 +203,29 @@ coef(lm.group)
 coef(lm.groupbsrr)
 print(lm.group)
 print(lm.groupbsrr)
-#'summary(lm.group)
+summary(lm.group)
 summary(lm.groupbsrr)
 pred.group <- predict(lm.group, newx = x_new)
 pred.groupl0l2 <- predict(lm.groupbsrr, newx = x_new)
+#-------------------include specified variables----------------------#
+Data <- gen.data(n, p, k, rho, family = "gaussian", beta = Tbeta, seed = seed)
+lm.bss <- bess.one(Data$x, Data$y, s = 5, always.include = 2)
 
+\dontrun{
+#-------------------code demonstration in doi: 10.18637/jss.v094.i04----------------------#
+Tbeta <- rep(0, 20)
+Tbeta[c(1, 2, 5, 9)] <- c(3, 1.5, -2, -1)
+
+data <- gen.data(n = 200, p = 20, family = "gaussian", beta = Tbeta,
+rho = 0.2, seed = 123)
+fit.one <- bess.one(data$x, data$y, s = 4, family = "gaussian")
+print(fit.one)
+summary(fit.one)
+coef(fit.one, sparse = FALSE)
+pred.one <- predict(fit.one, newdata = data$x)
+bm.one <- fit.one$bestmodel
+summary(bm.one)
+}
 }
 \references{
 Wen, C., Zhang, A., Quan, S. and Wang, X. (2020). BeSS: An R

@@ -1,7 +1,7 @@
 //
 // Created by Mamba on 2020/2/18.
 //
-//#define R_BUILD
+// #define R_BUILD
 #ifdef R_BUILD
 #include <Rcpp.h>
 #include <RcppEigen.h>
@@ -112,17 +112,6 @@ List sequential_path(Data &data, Algorithm *algorithm, Metric *metric, Eigen::Ve
             }
         }
     }
-
-    // for (i = 0; i < sequence_size; i++)
-    // {
-    //     cout << endl;
-    //     for (j = 0; j < lambda_size; j++)
-    //     {
-    //         cout << "i: " << i + 1 << " "
-    //              << ", j: " << j + 1 << ", ";
-    //         cout << ic_sequence(i, j) << loss_sequence[j](i) << endl;
-    //     }
-    // }
 
     int min_loss_index_row = 0, min_loss_index_col = 0;
     ic_sequence.minCoeff(&min_loss_index_row, &min_loss_index_col);
@@ -1129,7 +1118,6 @@ void seq_search(Data &data, Algorithm *algorithm, Metric *metric, double p[], do
     ic_sequence_2 = ic_sequence_2.head(j).eval();
     ic_sequence_1.minCoeff(&minPosition_1);
     ic_sequence_2.minCoeff(&minPosition_2);
-
     int minPosition;
     if (ic_sequence_1(minPosition_1) < ic_sequence_2(minPosition_2))
     {
@@ -1149,7 +1137,6 @@ void seq_search(Data &data, Algorithm *algorithm, Metric *metric, double p[], do
     }
     best_arg[0] = p[0] + (minPosition)*u[0];
     best_arg[1] = p[1] + (minPosition)*u[1];
-
     return;
 }
 List pgs_path(Data &data, Algorithm *algorithm, Metric *metric, int s_min, int s_max, double log_lambda_min, double log_lambda_max, int powell_path, int nlambda)
@@ -1200,7 +1187,7 @@ List pgs_path(Data &data, Algorithm *algorithm, Metric *metric, int s_min, int s
     ic_all(ttt) = ic_temp;
     lambda_chosen(ttt) = exp(P[0][1]);
 
-    while (ttt < 99)
+    while (ttt < 11)
     {
         ttt++;
         for (i = 0; i < 2; i++)
@@ -1220,7 +1207,7 @@ List pgs_path(Data &data, Algorithm *algorithm, Metric *metric, int s_min, int s
         U[0][1] = U[1][1];
         U[1][0] = P[2][0] - P[0][0];
         U[1][1] = P[2][1] - P[0][1];
-        if ((!(abs(U[1][0]) <= 0.0001 && abs(U[1][1]) <= 0.0001)) && ttt < 99)
+        if ((!(abs(U[1][0]) <= 0.0001 && abs(U[1][1]) <= 0.0001)) && ttt < 11)
         {
             if (powell_path == 1)
                 golden_section_search(data, algorithm, metric, P[0], U[1], s_min, s_max, log_lambda_min, log_lambda_max, P[0], beta_temp, coef0_temp, train_loss_temp, ic_temp, ic_sequence);
@@ -1308,12 +1295,6 @@ List pgs_path(Data &data, Algorithm *algorithm, Metric *metric, int s_min, int s
             mylist.add("train_loss", train_loss_all(min_ic_index));
             mylist.add("ic", ic_all(min_ic_index));
             mylist.add("lambda", lambda_chosen(min_ic_index));
-            mylist.add("beta_all", beta_all);
-            mylist.add("coef0_all", coef0_all);
-            mylist.add("train_loss_all", train_loss_all);
-            mylist.add("ic_all", ic_all);
-            mylist.add("lambda_all", lambda_chosen);
-            mylist.add("ic_mat", ic_sequence);
             return mylist;
 #endif
         }

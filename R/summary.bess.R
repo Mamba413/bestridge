@@ -20,10 +20,10 @@
 #' p <- 20
 #' k <- 5
 #' rho <- 0.4
-#' SNR <- 10
-#' cortype <- 1
 #' seed <- 10
-#' Data <- gen.data(n, p, k, rho, family = "gaussian", cortype = cortype, snr = SNR, seed = seed)
+#' Tbeta <- rep(0, p)
+#' Tbeta[1:k*floor(p/k):floor(p/k)] <- rep(1, k)
+#' Data <- gen.data(n, p, k, rho, family = "gaussian", beta = Tbeta, seed = seed)
 #' lm.bss <- bess(Data$x, Data$y, method = "sequential")
 #' lambda.list <- exp(seq(log(5), log(0.1), length.out = 10))
 #' lm.bsrr <- bess(Data$x, Data$y, type = "bsrr", method = "pgsection")
@@ -44,7 +44,7 @@
 #' summary(lm.groupbsrr)
 #'
 #' #-------------------summary for bess.one----------------------#
-#' Data <- gen.data(n, p, k, rho, family = "gaussian", cortype = cortype, snr = SNR, seed = seed)
+#' Data <- gen.data(n, p, k, rho, family = "gaussian", beta = Tbeta, seed = seed)
 #' lm.bss <- bess.one(Data$x, Data$y, s = 5)
 #' lm.bsrr <- bess.one(Data$x, Data$y, type = "bsrr", s = 5, lambda = 0.01)
 #'
@@ -111,17 +111,20 @@ summary.bess <-function(object, ...){
 
     if(deviance(object)>=0)
       cat("    deviance:         ", deviance(object),"\n") else cat("    deviance:        ", deviance(object),"\n")
-    if(object$ic.type %in% c("AIC", "BIC", "GIC")){
-      if(object$ic>=0)
-        cat("    ", object$ic.type, ":               ", object$ic,"\n", sep = "") else cat("    ",object$ic.type,":             ", object$ic,"\n", sep = "")
+    if(is.null(object$bess.one)){
+      if(object$ic.type %in% c("AIC", "BIC", "GIC")){
+        if(object$ic>=0)
+          cat("    ", object$ic.type, ":               ", object$ic,"\n", sep = "") else cat("    ",object$ic.type,":             ", object$ic,"\n", sep = "")
 
-    } else if(object$ic.type == "EBIC"){
-      if(object$ic>=0)
-        cat("    EBIC:             ", object$ic,"\n") else cat("    EBIC:            ", object$ic,"\n")
-    } else{
-      if(object$cvm >= 0)
-        cat("    cv loss:          ", object$cvm,"\n") else cat("    cv loss:         ", object$cvm,"\n")
+      } else if(object$ic.type == "EBIC"){
+        if(object$ic>=0)
+          cat("    EBIC:             ", object$ic,"\n") else cat("    EBIC:            ", object$ic,"\n")
+      } else{
+        if(object$cvm >= 0)
+          cat("    cv loss:          ", object$cvm,"\n") else cat("    cv loss:         ", object$cvm,"\n")
+      }
     }
+
     cat("----------------------------------------------------------------------------------\n")
   }
 

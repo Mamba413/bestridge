@@ -1,6 +1,10 @@
 # Various imports
 #' @importFrom Rcpp evalCpp
 #' @importFrom stats runif
+#' @importFrom survival coxph
+#' @importFrom survival Surv
+#' @importFrom stats glm
+#' @importFrom stats lm
 #' @importFrom stats rbinom
 #' @importFrom stats rpois
 #' @importFrom stats rnorm
@@ -48,8 +52,7 @@ NULL
 #' from \code{beta.all} and \code{coef0.all} in the \code{bess} object.
 #' @param \dots additional arguments
 #' @author Canhong Wen, Aijun Zhang, Shijie Quan, Liyuan Hu, Kangkang Jiang, Yanhang Zhang, Jin Zhu and Xueqin Wang.
-#' @seealso \code{\link{bess}}, \code{\link{plot.bess}},
-#' \code{\link{summary.bess}}.
+#' @seealso \code{\link{bess}}, \code{\link{summary.bess}}.
 #' @references Wen, C., Zhang, A., Quan, S. and Wang, X. (2020). BeSS: An R
 #' Package for Best Subset Selection in Linear, Logistic and Cox Proportional
 #' Hazards Models, \emph{Journal of Statistical Software}, Vol. 94(4).
@@ -61,10 +64,10 @@ NULL
 #' p <- 20
 #' k <- 5
 #' rho <- 0.4
-#' SNR <- 10
-#' cortype <- 1
 #' seed <- 10
-#' Data <- gen.data(n, p, k, rho, family = "gaussian", cortype = cortype, snr = SNR, seed = seed)
+#' Tbeta <- rep(0, p)
+#' Tbeta[1:k*floor(p/k):floor(p/k)] <- rep(1, k)
+#' Data <- gen.data(n, p, k, rho, family = "gaussian", seed = seed)
 #' lm.bss <- bess(Data$x, Data$y, method = "sequential")
 #'
 #' deviance(lm.bss)
@@ -84,6 +87,7 @@ deviance.bess <- function(object, best.model = TRUE,...)
     names(deviance)='deviance'
     return(deviance)
   }else{
+    if(!is.null(object$bess.one)) stop("Please set best.model = TRUE for bess objects from bess.one function.")
     if(object$method == "sequential"){
       train_loss_all <- matrix(unlist(object$loss.all), nrow = length(object$s.list), byrow = F) # orgininally, the train_loss_all is a list
       deviance <- deviance.all(object, train_loss_all)

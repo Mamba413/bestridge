@@ -6,12 +6,12 @@
 #' The best subset selection problem with model size \eqn{s} is
 #' \deqn{\min_\beta -2 \log L(\beta) \;\;{\rm s.t.}\;\; \|\beta\|_0 \leq s.} In
 #' the GLM case, \eqn{\log L(\beta)} is the log-likelihood function; In the Cox
-#' model, \eqn{logL(\beta)} is the log partial likelihood function.
+#' model, \eqn{\log L(\beta)} is the log partial likelihood function.
 #'
 #' The best ridge regression problem with model size \eqn{s} is
-#' \deqn{\min_\beta -2 logL(\beta) + \lambda\Vert\beta\Vert_2^2 \;\;{\rm
-#' s.t.}\;\; \|\beta\|_0 \leq s.} In the GLM case, \eqn{logL(\beta)} is the
-#' log-likelihood function; In the Cox model, \eqn{logL(\beta)} is the log
+#' \deqn{\min_\beta -2 \log L(\beta) + \lambda\Vert\beta\Vert_2^2 \;\;{\rm
+#' s.t.}\;\; \|\beta\|_0 \leq s.} In the GLM case, \eqn{\log L(\beta)} is the
+#' log likelihood function; In the Cox model, \eqn{\log L(\beta)} is the log
 #' partial likelihood function.
 #'
 #' For each candidate model size and \eqn{\lambda}, the best subset selection and the best subset ridge regression
@@ -64,7 +64,9 @@
 #' "powell"}. Default is \code{0.001}.
 #' @param lambda.max The maximum value of lambda. Only used for \code{method =
 #' "powell"}. Default is \code{100}.
-#' @param nlambda The number of \eqn{\lambda}s for the Powell path with sequential line search method. Only valid for \code{method = "psequential"}.
+#' @param nlambda The number of \eqn{\lambda}s for the Powell path with sequential line search method.
+#' Only valid for \code{method = "psequential"}.
+#' @param always.include A vector containing the index of variables that should always be included in the model.
 #' @param screening.num Users can pre-exclude some irrelevant variables according to maximum marginal likelihood estimators before fitting a
 #' model by passing an integer to \code{screening.num} and the sure independence screening will choose a set of variables of this size.
 #' Then the active set updates are restricted on this subset.
@@ -75,7 +77,7 @@
 #' \code{normalize = 3} for subtracting the means of the columns of \code{x} and \code{y}, and also
 #' normalizing the columns of \code{x} to have \eqn{\sqrt n} norm.
 #' If \code{normalize = NULL}, by default, \code{normalize} will be set \code{1} for \code{"gaussian"},
-#' \code{2} for \code{"binomial"}, \code{3} for \code{"cox"}.
+#' \code{2} for \code{"binomial"} and \code{"poisson"}, \code{3} for \code{"cox"}.
 #' @param weight Observation weights. Default is \code{1} for each observation.
 #' @param max.iter The maximum number of iterations in the bess function.
 #' In most of the case, only a few steps can guarantee the convergence. Default
@@ -91,8 +93,10 @@
 #' please set \code{group.index = NULL}. Default is \code{NULL}.
 #' @param seed Seed to be used to devide the sample into K cross-validation folds. Default is \code{NULL}.
 #' @return A list with class attribute 'bess' and named components:
-#' \item{beta}{The best fitting coefficients.} \item{coef0}{The best fitting
+#' \item{beta}{The best fitting coefficients.}
+#'  \item{coef0}{The best fitting
 #' intercept.}
+#' \item{bestmodel}{The best fitted model for \code{type = "bss"}, the class of which is \code{"lm"}, \code{"glm"} or \code{"coxph"}.}
 #' \item{loss}{The training loss of the best fitting model.}
 #' \item{ic}{The information criterion of the best fitting model when model
 #' selection is based on a certain information criterion.} \item{cvm}{The mean
@@ -100,7 +104,7 @@
 #' based on the cross-validation.}
 #'
 #' \item{lambda}{The lambda chosen for the best fitting model}
-#' \item{beta.all}{For \code{bess} objects obstained by \code{gsection}, \code{pgsection}
+#' \item{beta.all}{For \code{bess} objects obtained by \code{gsection}, \code{pgsection}
 #' and \code{psequential}, \code{beta.all} is a matrix with each column be the coefficients
 #' of the model in each iterative step in the tuning path.
 #' For \code{bess} objects obtained by \code{sequential} method,
@@ -108,24 +112,21 @@
 #' \code{s=0,1,...,p} and \eqn{\lambda} in \code{lambda.list} with the
 #' smallest loss function. For \code{"bess"} objects of \code{"bsrr"} type, the fitting coefficients of the
 #' \eqn{i^{th} \lambda} and the \eqn{j^{th}} \code{s} are at the \eqn{i^{th}}
-#' list component's \eqn{j^{th}} column. When screening is used, the active set updates are
-#'  restricted on a chosen subset and the \code{beta.all}
-#'  component of \code{bess} object contains only coefficients on this subset. To recover the original coefficients,
-#'  see \code{\link{recover}}.}
-#' \item{coef0.all}{For \code{bess} objects obetained from \code{gsection}, \code{pgsection} and \code{psequential},
+#' list component's \eqn{j^{th}} column.}
+#' \item{coef0.all}{For \code{bess} objects obtainedfrom \code{gsection}, \code{pgsection} and \code{psequential},
 #' \code{coef0.all} contains the intercept for the model in each iterative step in the tuning path.
 #' For \code{bess} objects obatined from \code{sequential} path,
 #' \code{coef0.all} contains the best fitting
 #' intercepts of size \eqn{s=0,1,\dots,p} and \eqn{\lambda} in
 #' \code{lambda.list} with the smallest loss function.}
-#' \item{loss.all}{For \code{bess} objects obetained from \code{gsection}, \code{pgsection} and \code{psequential},
+#' \item{loss.all}{For \code{bess} objects obtainedfrom \code{gsection}, \code{pgsection} and \code{psequential},
 #' \code{loss.all} contains the training loss of the model in each iterative step in the tuning path.
 #' For \code{bess} objects obatined from \code{sequential} path, this is a
 #' list of the training loss of the best fitting intercepts of model size
 #' \eqn{s=0,1,\dots,p} and \eqn{\lambda} in \code{lambda.list}. For \code{"bess"} object obtained by \code{"bsrr"},
 #' the training loss of the \eqn{i^{th} \lambda} and the \eqn{j^{th}} \code{s}
 #' is at the \eqn{i^{th}} list component's \eqn{j^{th}} entry.}
-#' \item{ic.all}{For \code{bess} objects obetained from \code{gsection}, \code{pgsection} and \code{psequential},
+#' \item{ic.all}{For \code{bess} objects obtainedfrom \code{gsection}, \code{pgsection} and \code{psequential},
 #' \code{ic.all} contains the values of the chosen information criterion of the model in each iterative step in the tuning path.
 #' For \code{bess} objects obatined from \code{sequential} path, this is a
 #' matrix of the values of the chosen information criterion of model size \eqn{s=0,1,\dots,p}
@@ -134,7 +135,7 @@
 #' \code{s} is at the \eqn{i^{th}} row \eqn{j^{th}} column. Only available when
 #' model selection is based on a certain information criterion.}
 #'
-#' \item{cvm.all}{For \code{bess} objects obetained from \code{gsection}, \code{pgsection} and \code{psequential},
+#' \item{cvm.all}{For \code{bess} objects obtainedfrom \code{gsection}, \code{pgsection} and \code{psequential},
 #' \code{cvm.all} contains the mean cross-validation error of the model in each iterative step in the tuning path.
 #' For \code{bess} objects obatined from \code{sequential} path, this is a
 #'  matrix of the mean cross-validation error of model size
@@ -151,7 +152,7 @@
 #' \item{method}{Method used for tuning parameters selection.}
 #' \item{ic.type}{The criterion of model selection.}
 #' @author Canhong Wen, Aijun Zhang, Shijie Quan, Liyuan Hu, Kangkang Jiang, Yanhang Zhang, Jin Zhu and Xueqin Wang.
-#' @seealso \code{\link{plot.bess}}, \code{\link{summary.bess}}, \code{\link{recover}},
+#' @seealso \code{\link{plot.bess}}, \code{\link{summary.bess}},
 #' \code{\link{coef.bess}}, \code{\link{predict.bess}}, \code{\link{bess.one}}.
 #' @references Wen, C., Zhang, A., Quan, S. and Wang, X. (2020). BeSS: An R
 #' Package for Best Subset Selection in Linear, Logistic and Cox Proportional
@@ -165,15 +166,15 @@
 #' p <- 20
 #' k <- 5
 #' rho <- 0.4
-#' SNR <- 10
-#' cortype <- 1
 #' seed <- 10
-#' Data <- gen.data(n, p, k, rho, family = "gaussian", cortype = cortype, snr = SNR, seed = seed)
+#' Tbeta <- rep(0, p)
+#' Tbeta[1:k*floor(p/k):floor(p/k)] <- rep(1, k)
+#' Data <- gen.data(n, p, k, rho, family = "gaussian", beta = Tbeta, seed = seed)
 #' x <- Data$x[1:140, ]
 #' y <- Data$y[1:140]
 #' x_new <- Data$x[141:200, ]
 #' y_new <- Data$y[141:200]
-#' lm.bss <- bess(x, y, method = "sequential")
+#' lm.bss <- bess(x, y)
 #' lambda.list <- exp(seq(log(5), log(0.1), length.out = 10))
 #' lm.bsrr <- bess(x, y, type = "bsrr", method = "pgsection")
 #' coef(lm.bss)
@@ -190,7 +191,7 @@
 #' plot(lm.bsrr)
 #' #-------------------logistic model----------------------#
 #' #Generate simulated data
-#' Data <- gen.data(n, p, k, rho, family = "binomial", cortype = cortype, snr = SNR, seed = seed)
+#' Data <- gen.data(n, p, k, rho, family = "binomial", beta = Tbeta, seed = seed)
 #'
 #' x <- Data$x[1:140, ]
 #' y <- Data$y[1:140]
@@ -211,15 +212,38 @@
 #' # generate plots
 #' plot(logi.bss, type = "both", breaks = TRUE)
 #' plot(logi.bsrr)
+#'#-------------------poisson model----------------------#
+#'Data <- gen.data(n, p, k, rho=0.3, family = "poisson", beta = Tbeta, seed = seed)
+#'
+#'x <- Data$x[1:140, ]
+#' y <- Data$y[1:140]
+#' x_new <- Data$x[141:200, ]
+#' y_new <- Data$y[141:200]
+#' poi.bss <- bess(x, y, family = "poisson")
+#' lambda.list <- exp(seq(log(5), log(0.1), length.out = 10))
+#' poi.bsrr <- bess(x, y, type = "bsrr",
+#'                  family = "poisson", lambda.list = lambda.list)
+#' coef(poi.bss)
+#' coef(poi.bsrr)
+#' print(poi.bss)
+#' print(poi.bsrr)
+#' summary(poi.bss)
+#' summary(poi.bsrr)
+#' pred.bss <- predict(poi.bss, newx = x_new)
+#' pred.bsrr <- predict(poi.bsrr, newx = x_new)
+#'
+#' # generate plots
+#' plot(poi.bss, type = "both", breaks = TRUE)
+#' plot(poi.bsrr)
 #' #-------------------coxph model----------------------#
 #' #Generate simulated data
-#' Data <- gen.data(n, p, k, rho, family = "cox", scal = 10)
+#' Data <- gen.data(n, p, k, rho, family = "cox", scal = 10, beta = Tbeta)
 #'
 #' x <- Data$x[1:140, ]
 #' y <- Data$y[1:140, ]
 #' x_new <- Data$x[141:200, ]
 #' y_new <- Data$y[141:200, ]
-#' cox.bss <- bess(x, y, family = "cox", method = "sequential")
+#' cox.bss <- bess(x, y, family = "cox")
 #' lambda.list <- exp(seq(log(5), log(0.1), length.out = 10))
 #' cox.bsrr <- bess(x, y, type = "bsrr", family = "cox", lambda.list = lambda.list)
 #' coef(cox.bss)
@@ -236,18 +260,16 @@
 #' plot(cox.bsrr)
 #'
 #'#----------------------High dimensional linear models--------------------#
-#' p <- 1000
-#' data <- gen.data(n, p, k, family = "gaussian", cortype = cortype, snr = SNR, seed = seed)
+#'\dontrun{
+#' data <- gen.data(n, p = 1000, k, family = "gaussian", seed = seed)
 #'
 #'# Best subset selection with SIS screening
 #' lm.high <- bess(data$x, data$y, screening.num = 100)
-#'
-#'# To recover the coefficients in beta.all, use function recover
-#' beta.all <- recover(lm.high)
+#'}
 #'
 #'#-------------------group selection----------------------#
 #'beta <- rep(c(rep(1,2),rep(0,3)), 4)
-#'Data <- gen.data(200, 20, 5, rho=0.4, beta = beta, snr = 100, seed =10)
+#'Data <- gen.data(200, 20, 5, rho=0.4, beta = beta, seed =10)
 #'x <- Data$x
 #'y <- Data$y
 #'
@@ -263,13 +285,49 @@
 #'summary(lm.groupbsrr)
 #'pred.group <- predict(lm.group, newx = x_new)
 #'pred.groupl0l2 <- predict(lm.groupbsrr, newx = x_new)
+#'#-------------------include specified variables----------------------#
+#'Data <- gen.data(n, p, k, rho, family = "gaussian", beta = Tbeta, seed = seed)
+#'lm.bss <- bess(Data$x, Data$y, always.include = 2)
+#'
+#'\dontrun{
+#'#-------------------trim32 data analysis in doi: 10.18637/jss.v094.i04----------------------#
+#'# import trim32 data by:
+#'load(url('https://github.com/Mamba413/bess/tree/master/data/trim32.RData'))
+#'# or manually downloading trim32.RData in the github page:
+#'# "https://github.com/Mamba413/bess/tree/master/data/" and read it by:
+#'load('trim32.RData')
+#'
+#'X <- trim32$x
+#'Y <- trim32$y
+#'dim(X)
+#'
+#'# running bess with argument method = "sequential".
+#' fit.seq <- bess(X, Y, method = "sequential")
+#' summary(fit.seq)
+#'
+#' # the bess function outputs an 'lm' type of object bestmodel associated
+#' # with the selected best model
+#' bm.seq <- fit.seq$bestmodel
+#' summary(bm.seq)
+#' pred.seq <- predict(fit.seq, newdata = data$x)
+#' plot(fit.seq, type = "both", breaks = TRUE)
+#'
+#' # We now call the function bess with argument method = "gsection"
+#' fit.gs <- bess(X, Y, family = "gaussian", method = "gsection")
+#' bm.gs <- fit.gs$bestmodel
+#' summary(bm.gs)
+#' beta <- coef(fit.gs, sparse = TRUE)
+#' class(beta)
+#' pred.gs <- predict(fit.gs, newdata = X)
+#'}
 #' @export
-bess <- function(x, y, family = "gaussian", type = c("bss", "bsrr"),
-                 method = "gsection",
+bess <- function(x, y, family = c("gaussian", "binomial", "poisson", "cox"), type = c("bss", "bsrr"),
+                 method = c("gsection", "sequential", "pgsection", "psequential"),
                  tune = c("gic", "ebic", "bic", "aic", "cv"),
                  s.list, lambda.list = 0,
                  s.min, s.max,
                  lambda.min = 0.001, lambda.max = 100, nlambda = 100,
+                 always.include = NULL,
                  screening.num = NULL,
                  normalize = NULL, weight = NULL,
                  max.iter = 20, warm.start = TRUE,
@@ -281,7 +339,7 @@ bess <- function(x, y, family = "gaussian", type = c("bss", "bsrr"),
   if(missing(s.list)) s.list <- 1:min(ncol(x),round(nrow(x)/log(nrow(x))))
   if(missing(s.min)) s.min <- 1
   if(missing(s.max)) s.max <- min(ncol(x),round(nrow(x)/log(nrow(x))))
-
+  if(is.null(always.include)) always.include <- numeric(0) else always.include <- always.include - 1
   tune <- match.arg(tune)
   ic_type <- switch(tune,
                     "aic" = 1,
@@ -291,23 +349,23 @@ bess <- function(x, y, family = "gaussian", type = c("bss", "bsrr"),
                     "cv" = 1)
   is_cv <- ifelse(tune == "cv", TRUE, FALSE)
   type <- match.arg(type)
-  # family <- match.arg(family)
-  FAMILY <- c("gaussian", "binomial", "poisson", "cox")
-  family <- pmatch(family, FAMILY)
-  if(is.na(family)) stop("invalid family")
-  if(family == -1) stop("ambigous family")
-  family <- c("gaussian", "binomial", "poisson", "cox")[family]
+  family <- match.arg(family)
+  # FAMILY <- c("gaussian", "binomial", "poisson", "cox")
+  # family <- pmatch(family, FAMILY)
+  # if(is.na(family)) stop("invalid family")
+  # if(family == -1) stop("ambigous family")
+  # family <- c("gaussian", "binomial", "poisson", "cox")[family]
   model_type <- switch(family,
                        "gaussian" = 1,
                        "binomial" = 2,
                        "poisson" = 3,
                        "cox" = 4)
-  #method <- match.arg(method)
-  METHOD <- c("gsection", "sequential", "pgsection", "psequential")
-  method <- pmatch(method, METHOD)
-  if(is.na(method)) stop("invalid method")
-  if(method == -1) stop("ambigous method")
-  method <- c("gsection", "sequential", "pgsection", "psequential")[method]
+  method <- match.arg(method)
+  # METHOD <- c("gsection", "sequential", "pgsection", "psequential")
+  # method <- pmatch(method, METHOD)
+  # if(is.na(method)) stop("invalid method")
+  # if(method == -1) stop("ambigous method")
+  # method <- c("gsection", "sequential", "pgsection", "psequential")[method]
   if(method == "pgsection"){
     path_type <- 2
     line.search <- 1
@@ -385,15 +443,22 @@ bess <- function(x, y, family = "gaussian", type = c("bss", "bsrr"),
     normalize <- switch(family,
                         "gaussian" = 1,
                         "binomial" = 2,
-                        "poisson" = 1,
+                        "poisson" = 2,
                         "cox" = 3)
   } else if(normalize !=0){
-    normalize <- as.character(normalize)
-    normalize <- switch (normalize,
-                         '1' <- 2,
-                         '2' <- 3,
-                         '3' <- 1
-    )
+    # normalize <- as.character(normalize)
+    # normalize <- switch (normalize,
+    #                      '1' <- 2,
+    #                      '2' <- 3,
+    #                      '3' <- 1
+    # )
+    if(normalize == 1){
+      normalize <- 2
+    }else if(normalize == 2){
+      normalize <- 3
+    }else{
+      normalize <- 1
+    }
     is_normal <- TRUE
   } else{
     is_normal <- FALSE
@@ -418,7 +483,7 @@ bess <- function(x, y, family = "gaussian", type = c("bss", "bsrr"),
   #   x <- model.matrix(~., data = x)[,-1]
   # }
   vn <- colnames(x)
-  if(is.null(vn)) vn <- paste("x", 1:ncol(x), sep = "_")
+  if(is.null(vn)) vn <- paste("x", 1:ncol(x), sep = "")
   if(is.null(weight)) weight <- rep(1, nrow(x))
   if(is.null(screening.num)){
     screening <- FALSE
@@ -446,6 +511,8 @@ bess <- function(x, y, family = "gaussian", type = c("bss", "bsrr"),
   # }
   if(algorithm_type == "PDAS"){
     if(model_type == 4){
+      ys <- y
+      xs <- x
       sort_y <- order(y[, 1])
       y <- y[sort_y, ]
       x <- x[sort_y, ]
@@ -456,7 +523,7 @@ bess <- function(x, y, family = "gaussian", type = c("bss", "bsrr"),
                         ic_type = ic_type, is_cv = is_cv, K = nfolds, state = rep(2,10), sequence = s.list, lambda_seq = 0,
                         s_min = s.min, s_max = s.max, K_max = 10, epsilon = 10,
                         lambda_max = 0, lambda_min = 0 , nlambda = nlambda, is_screening = screening, screening_size = screening.num,
-                        powell_path = 1, g_index=(1:ncol(x)-1), always_select=numeric(0), tao=1.1)
+                        powell_path = 1, g_index=(1:ncol(x)-1), always_select=always.include, tao=1.1)
     beta.pdas <- res.pdas$beta
     names(beta.pdas) <- vn
     res.pdas$beta <- beta.pdas
@@ -466,10 +533,9 @@ bess <- function(x, y, family = "gaussian", type = c("bss", "bsrr"),
     } else{
       names(res.pdas)[which(names(res.pdas)=='ic_all')] <- 'ic.all'
     }
-    res.pdas$x <- x
-    res.pdas$y <- y
+    res.pdas$x <- ifelse(family == "cox", xs, x)
+    res.pdas$y <- ifelse(family == "cox", ys, y)
     res.pdas$family <- family
-    res.pdas$factor <- factor
     names(res.pdas)[which(names(res.pdas)=="train_loss")] <- "loss"
     names(res.pdas)[which(names(res.pdas)=="train_loss_all")] <- "loss.all"
     names(res.pdas)[which(names(res.pdas)=='beta_all')] <- 'beta.all'
@@ -485,6 +551,22 @@ bess <- function(x, y, family = "gaussian", type = c("bss", "bsrr"),
     if(screening) res.pdas$screening_A <-  res.pdas$screening_A + 1;
     res.pdas$call <- match.call()
     class(res.pdas) <- 'bess'
+    #res.pdas$beta_all <- res.pdas$beta.all
+    res.pdas$beta.all <- recover(res.pdas, F)
+    if(family == "gaussian"){
+      xbest <- x[,which(beta.pdas!=0)]
+      bestmodel <- lm(y~xbest, weights = weight)
+    }else if(family == "cox"){
+      xbest <- xs[,which(beta.pdas!=0)]
+      bestmodel <- coxph(Surv(ys[,1],ys[,2])~xbest, iter.max=max.iter, weights=weight)
+    }else{
+      xbest <- x[,which(beta.pdas!=0)]
+      bestmodel=glm(y~xbest, family=family, weights=weight)
+    }
+
+    res.pdas$bestmodel <- bestmodel
+
+    set.seed(NULL)
     return(res.pdas)
   }
   if(algorithm_type == "GPDAS"){
@@ -499,7 +581,7 @@ bess <- function(x, y, family = "gaussian", type = c("bss", "bsrr"),
                          ic_type = ic_type, is_cv = is_cv, K = nfolds, state = rep(2,10), sequence = s.list, lambda_seq = 0,
                          s_min = s.min, s_max = s.max, K_max = 10, epsilon = 10,
                          lambda_max = 0, lambda_min = 0 , nlambda = nlambda, is_screening = screening,
-                         screening_size = screening.num, powell_path = 1, g_index = g_index, always_select=numeric(0), tao=1.1)
+                         screening_size = screening.num, powell_path = 1, g_index = g_index, always_select=always.include, tao=1.1)
     beta.gpdas <- res.gpdas$beta
     names(beta.gpdas) <- vn
     res.gpdas$beta <- beta.gpdas
@@ -516,7 +598,6 @@ bess <- function(x, y, family = "gaussian", type = c("bss", "bsrr"),
     names(res.gpdas)[which(names(res.gpdas)=="train_loss_all")] <- "loss.all"
     names(res.gpdas)[which(names(res.gpdas)=='beta_all')] <- 'beta.all'
     names(res.gpdas)[which(names(res.gpdas)=="coef0_all")] <- 'coef0.all'
-    res.gpdas$factor <- factor
     res.gpdas$s.list <- s.list
     res.gpdas$nsample <- nrow(x)
     res.gpdas$algorithm_type <- "GPDAS"
@@ -531,6 +612,22 @@ bess <- function(x, y, family = "gaussian", type = c("bss", "bsrr"),
     if(screening) res.gpdas$screening_A <-  res.gpdas$screening_A + 1;
     res.gpdas$call <- match.call()
     class(res.gpdas) <- "bess"
+    #res.gpdas$beta_all <- res.gpdas$beta.all
+    res.gpdas$beta.all <- recover(res.gpdas, F)
+    xbest <- x[,which(beta.gpdas!=0)]
+    if(family == "gaussian"){
+      xbest <- x[,which(beta.gpdas!=0)]
+      bestmodel <- lm(y~xbest, weights = weight)
+    }else if(family == "cox"){
+      xbest <- xs[,which(beta.gpdas!=0)]
+      bestmodel <- coxph(Surv(ys[,1],ys[,2])~xbest, iter.max=max.iter, weights=weight)
+    }else{
+      xbest <- x[,which(beta.gpdas!=0)]
+      bestmodel=glm(y~xbest, family=family, weights=weight)
+    }
+    res.gpdas$bestmodel <- bestmodel
+
+    set.seed(NULL)
     return(res.gpdas)
   }
   if(algorithm_type == "GL0L2"){
@@ -546,7 +643,7 @@ bess <- function(x, y, family = "gaussian", type = c("bss", "bsrr"),
                          s_min = s.min, s_max = s.max, K_max = 10, epsilon = 10,
                          lambda_max = lambda.max, lambda_min = lambda.min, nlambda = nlambda,
                          is_screening = screening, screening_size = screening.num, powell_path = 1,
-                         g_index = g_index, always_select=numeric(0), tao=1.1)
+                         g_index = g_index, always_select=always.include, tao=1.1)
     beta.gl0l2 <- res.gl0l2$beta
     names(beta.gl0l2) <- vn
     res.gl0l2$beta <- beta.gl0l2
@@ -559,7 +656,6 @@ bess <- function(x, y, family = "gaussian", type = c("bss", "bsrr"),
     res.gl0l2$x <- x
     res.gl0l2$y <- y
     res.gl0l2$family <- family
-    res.gl0l2$factor <- factor
     res.gl0l2$s.list <- s.list
     names(res.gl0l2)[which(names(res.gl0l2)=="train_loss")] <- "loss"
     names(res.gl0l2)[which(names(res.gl0l2)=="train_loss_all")] <- "loss.all"
@@ -585,6 +681,11 @@ bess <- function(x, y, family = "gaussian", type = c("bss", "bsrr"),
     if(screening) res.gl0l2$screening_A <-  res.gl0l2$screening_A + 1;
     res.gl0l2$call <- match.call()
     class(res.gl0l2) <- "bess"
+    #res.gl0l2$beta_all <- res.gl0l2$beta.all
+    res.gl0l2$beta.all <- recover(res.gl0l2, F)
+    res.gl0l2$bestmodel <- NULL
+
+    set.seed(NULL)
     return(res.gl0l2)
   }
   # L0L2
@@ -602,7 +703,7 @@ bess <- function(x, y, family = "gaussian", type = c("bss", "bsrr"),
                         ic_type = ic_type, is_cv = is_cv, K = nfolds, state = rep(2,10), sequence = s.list, lambda_seq = lambda.list,
                         s_min = s.min, s_max = s.max, K_max = 10, epsilon = 10,
                         lambda_max = lambda.max, lambda_min = lambda.min, nlambda = nlambda, is_screening = screening, screening_size = screening.num,
-                        powell_path = line.search, g_index = (1:ncol(x) -1), always_select=numeric(0), tao=1.1)
+                        powell_path = line.search, g_index = (1:ncol(x) -1), always_select=always.include, tao=1.1)
     beta.l0l2 <- res.l0l2$beta
     # length(which.max(beta.l0l2!=0))
     names(beta.l0l2) <- vn
@@ -616,7 +717,6 @@ bess <- function(x, y, family = "gaussian", type = c("bss", "bsrr"),
     res.l0l2$x <- x
     res.l0l2$y <- y
     res.l0l2$family <- family
-    res.l0l2$factor <- factor
     res.l0l2$s.list <- s.list
     names(res.l0l2)[which(names(res.l0l2)=="train_loss")] <- "loss"
     names(res.l0l2)[which(names(res.l0l2)=="train_loss_all")] <- "loss.all"
@@ -640,6 +740,9 @@ bess <- function(x, y, family = "gaussian", type = c("bss", "bsrr"),
     if(screening) res.l0l2$screening_A <-  res.l0l2$screening_A + 1;
     res.l0l2$call <- match.call()
     class(res.l0l2) <- "bess"
+    #res.l0l2$beta_all <- res.l0l2$beta.all
+    res.l0l2$beta.all <- recover(res.l0l2, F)
+    res.l0l2$bestmodel <- NULL
     return(res.l0l2)
 
     set.seed(NULL)

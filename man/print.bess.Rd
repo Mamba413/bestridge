@@ -28,10 +28,10 @@ n = 200
 p = 20
 k = 5
 rho = 0.4
-SNR = 10
-cortype = 1
 seed = 10
-Data = gen.data(n, p, k, rho, family = "gaussian", cortype=cortype, snr=SNR, seed=seed)
+Tbeta <- rep(0, p)
+Tbeta[1:k*floor(p/k):floor(p/k)] <- rep(1, k)
+Data = gen.data(n, p, k, rho, family = "gaussian", beta = Tbeta, seed=seed)
 lm.bss = bess(Data$x, Data$y, method = "sequential")
 lambda.list = exp(seq(log(5), log(0.1), length.out = 10))
 lm.bsrr = bess(Data$x, Data$y, type = "bsrr", lambda.list = lambda.list, method = "sequential")
@@ -47,8 +47,7 @@ Hazards Models, \emph{Journal of Statistical Software}, Vol. 94(4).
 doi:10.18637/jss.v094.i04.
 }
 \seealso{
-\code{\link{bess}}, \code{\link{plot.bess}},
-\code{\link{summary.bess}}.
+\code{\link{bess}}, \code{\link{coef.bess}}.
 }
 \author{
 Canhong Wen, Aijun Zhang, Shijie Quan, Liyuan Hu, Kangkang Jiang, Yanhang Zhang, Jin Zhu and Xueqin Wang.
