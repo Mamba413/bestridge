@@ -54,8 +54,10 @@
 #' If you do not fit a model with a group structure,
 #' please set \code{group.index = NULL}. Default is \code{NULL}.
 #' @return A list with class attribute 'bess' and named components:
-#' \item{beta}{The best fitting coefficients.} \item{coef0}{The best fitting
+#' \item{beta}{The best fitting coefficients.}
+#'  \item{coef0}{The best fitting
 #' intercept.}
+#' \item{bestmodel}{The best fitted model for \code{type = "bss"}, the class of which is \code{"lm"}, \code{"glm"} or \code{"coxph"}.}
 #' \item{loss}{The training loss of the fitting model.}
 #' \item{s}{The model size.}
 #' \item{lambda}{The shrinkage parameter.}
