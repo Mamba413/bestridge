@@ -21,7 +21,7 @@ Author:
   Yanhang Zhang [aut],
   Jin Zhu [aut],
   Xueqin Wang [aut]
-Maintainer:  Canhong Wen <wencanhong@gmail.com>
+Maintainer:  Canhong Wen <1249096170@qq.com>
 Description: An implementation of best subset selection in generalized linear model and Cox proportional hazard model via the primal dual active set algorithm proposed by Wen, C., Zhang, A., Quan, S. and Wang, X. (2020) <doi:10.18637/jss.v094.i04>. The algorithm formulates coefficient parameters and residuals as primal and dual variables and utilizes efficient active set selection strategies based on the complementarity of the primal and dual variables.
 License: GPL-3
 Depends: R (>= 3.5.0)
