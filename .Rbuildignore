@@ -1,2 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^data-raw$
+R/BeSS-package.R
+^cran-comments\.md$
+^CRAN-RELEASE$

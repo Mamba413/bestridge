@@ -66,7 +66,7 @@
 #' "powell"}. Default is \code{100}.
 #' @param nlambda The number of \eqn{\lambda}s for the Powell path with sequential line search method.
 #' Only valid for \code{method = "psequential"}.
-#' @param always.include A vector containing the index of variables that should always be included in the model.
+#' @param always.include An integer vector containing the indexes of variables that should always be included in the model.
 #' @param screening.num Users can pre-exclude some irrelevant variables according to maximum marginal likelihood estimators before fitting a
 #' model by passing an integer to \code{screening.num} and the sure independence screening will choose a set of variables of this size.
 #' Then the active set updates are restricted on this subset.
@@ -113,31 +113,31 @@
 #' smallest loss function. For \code{"bess"} objects of \code{"bsrr"} type, the fitting coefficients of the
 #' \eqn{i^{th} \lambda} and the \eqn{j^{th}} \code{s} are at the \eqn{i^{th}}
 #' list component's \eqn{j^{th}} column.}
-#' \item{coef0.all}{For \code{bess} objects obtainedfrom \code{gsection}, \code{pgsection} and \code{psequential},
+#' \item{coef0.all}{For \code{bess} objects obtained from \code{gsection}, \code{pgsection} and \code{psequential},
 #' \code{coef0.all} contains the intercept for the model in each iterative step in the tuning path.
-#' For \code{bess} objects obatined from \code{sequential} path,
+#' For \code{bess} objects obtained from \code{sequential} path,
 #' \code{coef0.all} contains the best fitting
 #' intercepts of size \eqn{s=0,1,\dots,p} and \eqn{\lambda} in
 #' \code{lambda.list} with the smallest loss function.}
-#' \item{loss.all}{For \code{bess} objects obtainedfrom \code{gsection}, \code{pgsection} and \code{psequential},
+#' \item{loss.all}{For \code{bess} objects obtained from \code{gsection}, \code{pgsection} and \code{psequential},
 #' \code{loss.all} contains the training loss of the model in each iterative step in the tuning path.
-#' For \code{bess} objects obatined from \code{sequential} path, this is a
+#' For \code{bess} objects obtained from \code{sequential} path, this is a
 #' list of the training loss of the best fitting intercepts of model size
 #' \eqn{s=0,1,\dots,p} and \eqn{\lambda} in \code{lambda.list}. For \code{"bess"} object obtained by \code{"bsrr"},
 #' the training loss of the \eqn{i^{th} \lambda} and the \eqn{j^{th}} \code{s}
 #' is at the \eqn{i^{th}} list component's \eqn{j^{th}} entry.}
-#' \item{ic.all}{For \code{bess} objects obtainedfrom \code{gsection}, \code{pgsection} and \code{psequential},
+#' \item{ic.all}{For \code{bess} objects obtained from \code{gsection}, \code{pgsection} and \code{psequential},
 #' \code{ic.all} contains the values of the chosen information criterion of the model in each iterative step in the tuning path.
-#' For \code{bess} objects obatined from \code{sequential} path, this is a
+#' For \code{bess} objects obtained from \code{sequential} path, this is a
 #' matrix of the values of the chosen information criterion of model size \eqn{s=0,1,\dots,p}
 #' and \eqn{\lambda} in \code{lambda.list} with the smallest loss function. For \code{"bess"} object obtained by \code{"bsrr"},
 #' the training loss of the \eqn{i^{th} \lambda} and the \eqn{j^{th}}
 #' \code{s} is at the \eqn{i^{th}} row \eqn{j^{th}} column. Only available when
 #' model selection is based on a certain information criterion.}
 #'
-#' \item{cvm.all}{For \code{bess} objects obtainedfrom \code{gsection}, \code{pgsection} and \code{psequential},
+#' \item{cvm.all}{For \code{bess} objects obtained from \code{gsection}, \code{pgsection} and \code{psequential},
 #' \code{cvm.all} contains the mean cross-validation error of the model in each iterative step in the tuning path.
-#' For \code{bess} objects obatined from \code{sequential} path, this is a
+#' For \code{bess} objects obtained from \code{sequential} path, this is a
 #'  matrix of the mean cross-validation error of model size
 #' \eqn{s=0,1,\dots,p} and \eqn{\lambda} in \code{lambda.list} with the
 #' smallest loss function. For \code{"bess"} object obtained by \code{"bsrr"}, the training loss of the \eqn{i^{th}
@@ -339,7 +339,8 @@ bess <- function(x, y, family = c("gaussian", "binomial", "poisson", "cox"), typ
   if(missing(s.list)) s.list <- 1:min(ncol(x),round(nrow(x)/log(nrow(x))))
   if(missing(s.min)) s.min <- 1
   if(missing(s.max)) s.max <- min(ncol(x),round(nrow(x)/log(nrow(x))))
-  if(is.null(always.include)) always.include <- numeric(0) else always.include <- always.include - 1
+
+
   tune <- match.arg(tune)
   ic_type <- switch(tune,
                     "aic" = 1,
@@ -495,6 +496,19 @@ bess <- function(x, y, family = c("gaussian", "binomial", "poisson", "cox"), typ
       if(screening.num < s.list[length(s.list)]) stop("The number of screening features must be equal or greater than the maximum one in s.list!")
     } else{
       if(screening.num < s.max) stop("The number of screening features must be equal or greater than the s.max!")
+    }
+  }
+  if(is.null(always.include)) {
+    always.include <- numeric(0)
+  }else{
+    if(is.na(sum(as.integer(always.include)))) stop("always.include should be an integer vector")
+    if(sum(always.include <= 0)) stop("always.include should be an vector containing variable indexes which is possitive.")
+    always.include <- as.integer(always.include) - 1
+    if(length(always.include) > screening.num) stop("The number of variables in always.include should not exceed the sc")
+    if(path_type == 1){
+      if(length(always.include) > s.list[length(s.list)]) stop("always.include containing too many variables. The length of it should not exceed the maximum in s.list.")
+    }else{
+      if(length(always.include)>s.max) stop("always.include containing too many variables. The length of it should not exceed the s.max.")
     }
   }
   # if(is.null(screening.num)){

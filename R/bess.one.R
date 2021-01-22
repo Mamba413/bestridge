@@ -31,7 +31,7 @@
 #' \code{"poisson"}, or \code{"cox"}. Depending on the response.
 #' @param s A specified model size
 #' @param lambda A shrinkage parameter for \code{"bsrr"}.
-#' @param always.include A vector containing the index of variables that should always be included in the model.
+#' @param always.include An integer vector containing the indexes of variables that should always be included in the model.
 #' @param screening.num Users can pre-exclude some irrelevant variables according to maximum marginal likelihood estimators before fitting a
 #' model by passing an integer to \code{screening.num} and the sure independence screening will choose a set of variables of this size.
 #' Then the active set updates are restricted on this subset.

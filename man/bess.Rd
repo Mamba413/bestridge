@@ -81,7 +81,7 @@ round(n/log(n)))}.}
 \item{nlambda}{The number of \eqn{\lambda}s for the Powell path with sequential line search method.
 Only valid for \code{method = "psequential"}.}
 
-\item{always.include}{A vector containing the index of variables that should always be included in the model.}
+\item{always.include}{An integer vector containing the indexes of variables that should always be included in the model.}
 
 \item{screening.num}{Users can pre-exclude some irrelevant variables according to maximum marginal likelihood estimators before fitting a
 model by passing an integer to \code{screening.num} and the sure independence screening will choose a set of variables of this size.
@@ -138,31 +138,31 @@ A list of the best fitting coefficients of size
 smallest loss function. For \code{"bess"} objects of \code{"bsrr"} type, the fitting coefficients of the
 \eqn{i^{th} \lambda} and the \eqn{j^{th}} \code{s} are at the \eqn{i^{th}}
 list component's \eqn{j^{th}} column.}
-\item{coef0.all}{For \code{bess} objects obtainedfrom \code{gsection}, \code{pgsection} and \code{psequential},
+\item{coef0.all}{For \code{bess} objects obtained from \code{gsection}, \code{pgsection} and \code{psequential},
 \code{coef0.all} contains the intercept for the model in each iterative step in the tuning path.
-For \code{bess} objects obatined from \code{sequential} path,
+For \code{bess} objects obtained from \code{sequential} path,
 \code{coef0.all} contains the best fitting
 intercepts of size \eqn{s=0,1,\dots,p} and \eqn{\lambda} in
 \code{lambda.list} with the smallest loss function.}
-\item{loss.all}{For \code{bess} objects obtainedfrom \code{gsection}, \code{pgsection} and \code{psequential},
+\item{loss.all}{For \code{bess} objects obtained from \code{gsection}, \code{pgsection} and \code{psequential},
 \code{loss.all} contains the training loss of the model in each iterative step in the tuning path.
-For \code{bess} objects obatined from \code{sequential} path, this is a
+For \code{bess} objects obtained from \code{sequential} path, this is a
 list of the training loss of the best fitting intercepts of model size
 \eqn{s=0,1,\dots,p} and \eqn{\lambda} in \code{lambda.list}. For \code{"bess"} object obtained by \code{"bsrr"},
 the training loss of the \eqn{i^{th} \lambda} and the \eqn{j^{th}} \code{s}
 is at the \eqn{i^{th}} list component's \eqn{j^{th}} entry.}
-\item{ic.all}{For \code{bess} objects obtainedfrom \code{gsection}, \code{pgsection} and \code{psequential},
+\item{ic.all}{For \code{bess} objects obtained from \code{gsection}, \code{pgsection} and \code{psequential},
 \code{ic.all} contains the values of the chosen information criterion of the model in each iterative step in the tuning path.
-For \code{bess} objects obatined from \code{sequential} path, this is a
+For \code{bess} objects obtained from \code{sequential} path, this is a
 matrix of the values of the chosen information criterion of model size \eqn{s=0,1,\dots,p}
 and \eqn{\lambda} in \code{lambda.list} with the smallest loss function. For \code{"bess"} object obtained by \code{"bsrr"},
 the training loss of the \eqn{i^{th} \lambda} and the \eqn{j^{th}}
 \code{s} is at the \eqn{i^{th}} row \eqn{j^{th}} column. Only available when
 model selection is based on a certain information criterion.}
 
-\item{cvm.all}{For \code{bess} objects obtainedfrom \code{gsection}, \code{pgsection} and \code{psequential},
+\item{cvm.all}{For \code{bess} objects obtained from \code{gsection}, \code{pgsection} and \code{psequential},
 \code{cvm.all} contains the mean cross-validation error of the model in each iterative step in the tuning path.
-For \code{bess} objects obatined from \code{sequential} path, this is a
+For \code{bess} objects obtained from \code{sequential} path, this is a
  matrix of the mean cross-validation error of model size
 \eqn{s=0,1,\dots,p} and \eqn{\lambda} in \code{lambda.list} with the
 smallest loss function. For \code{"bess"} object obtained by \code{"bsrr"}, the training loss of the \eqn{i^{th}
