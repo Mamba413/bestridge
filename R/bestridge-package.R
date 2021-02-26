@@ -16,6 +16,9 @@
 #' @references Eleonore Gravier., Gaelle Pierron., and Anne Vincent-Salomon.
 #' (2010). A prognostic DNA signature for T1T2 node-negative breast cancer
 #' patients.
+#' @keywords datasets
+#' @return
+#' No return value
 #' @source \url{https://github.com/ramhiser}
 NULL
 
@@ -45,6 +48,8 @@ NULL
 #' and treatment of adenocarcinoma of the prostate II. Radical prostatectomy
 #' treated patients, Journal of Urology 16: 1076-1083.
 #' @keywords datasets
+#' @return
+#' No return value
 NULL
 
 
@@ -73,7 +78,11 @@ NULL
 #' J. and Ferreira, J. (1983).  Coronary risk factor screening in three rural
 #' communities. South African Medical Journal 64: 430-436.
 #' @keywords datasets
+#' @return
+#' No return value
 NULL
+
+
 
 
 

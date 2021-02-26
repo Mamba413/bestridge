@@ -1,16 +1,51 @@
-#' summary method for a "bess.one" object
+# Various imports
+#' @importFrom Rcpp evalCpp
+#' @importFrom stats runif
+#' @importFrom survival coxph
+#' @importFrom survival Surv
+#' @importFrom stats glm
+#' @importFrom stats lm
+#' @importFrom stats rbinom
+#' @importFrom stats rpois
+#' @importFrom stats rnorm
+#' @importFrom stats rexp
+#' @importFrom stats deviance
+#' @importFrom stats logLik
+#' @importFrom stats quantile
+#' @importFrom stats coef
+#' @importFrom MASS mvrnorm
+#' @importFrom Matrix Matrix
+#' @importFrom pheatmap pheatmap
+#' @importFrom graphics abline
+#' @importFrom graphics axis
+#' @importFrom graphics box
+#' @importFrom graphics grid
+#' @importFrom graphics layout
+#' @importFrom graphics lines
+#' @importFrom graphics mtext
+#' @importFrom graphics par
+#' @importFrom graphics plot
+#' @importFrom graphics plot.new
+#' @importFrom graphics plot.window
+#' @importFrom graphics text
+#' @importFrom graphics title
+NULL
+
+#' summary method for a "bsrr" object
 #'
-#' Print a summary of the "bess.one" object.
+#' Print a summary of the "bsrr" object.
 #'
 #'
-#' @param object A "bess" object.
+#' @param object A "bsrr" object.
 #' @param \dots additional print arguments
 #' @author Canhong Wen, Aijun Zhang, Shijie Quan, Liyuan Hu, Kangkang Jiang, Yanhang Zhang, Jin Zhu and Xueqin Wang.
-#' @seealso \code{\link{bess}}.
+#' @seealso \code{\link{bsrr}}.
 #' @references Wen, C., Zhang, A., Quan, S. and Wang, X. (2020). BeSS: An R
 #' Package for Best Subset Selection in Linear, Logistic and Cox Proportional
 #' Hazards Models, \emph{Journal of Statistical Software}, Vol. 94(4).
 #' doi:10.18637/jss.v094.i04.
+#' @return
+#' No return value
 #' @examples
 #'
 #'
@@ -24,11 +59,9 @@
 #' Tbeta <- rep(0, p)
 #' Tbeta[1:k*floor(p/k):floor(p/k)] <- rep(1, k)
 #' Data <- gen.data(n, p, k, rho, family = "gaussian", beta = Tbeta, seed = seed)
-#' lm.bss <- bess(Data$x, Data$y, method = "sequential")
 #' lambda.list <- exp(seq(log(5), log(0.1), length.out = 10))
-#' lm.bsrr <- bess(Data$x, Data$y, type = "bsrr", method = "pgsection")
+#' lm.bsrr <- bsrr(Data$x, Data$y, method = "pgsection")
 #'
-#' summary(lm.bss)
 #' summary(lm.bsrr)
 #'
 #'#-------------------group selection----------------------#
@@ -37,25 +70,15 @@
 #'
 #' group.index <- c(rep(1, 2), rep(2, 3), rep(3, 2), rep(4, 3),
 #'                 rep(5, 2), rep(6, 3), rep(7, 2), rep(8, 3))
-#' lm.group <- bess(Data$x, Data$y, s.min=1, s.max = 8, type = "bss", group.index = group.index)
-#' lm.groupbsrr <- bess(Data$x, Data$y, type = "bsrr", s.min = 1, s.max = 8, group.index = group.index)
+#' lm.groupbsrr <- bsrr(Data$x, Data$y, s.min = 1, s.max = 8, group.index = group.index)
 #'
-#' summary(lm.group)
 #' summary(lm.groupbsrr)
 #'
-#' #-------------------summary for bess.one----------------------#
-#' Data <- gen.data(n, p, k, rho, family = "gaussian", beta = Tbeta, seed = seed)
-#' lm.bss <- bess.one(Data$x, Data$y, s = 5)
-#' lm.bsrr <- bess.one(Data$x, Data$y, type = "bsrr", s = 5, lambda = 0.01)
-#'
-#' summary(lm.bss)
-#' summary(lm.bsrr)
-#'
-#' @method summary bess
+#' @method summary bsrr
 #' @export
-#' @export summary.bess
-summary.bess <-function(object, ...){
-  if(is.null(object$bess.one)){
+#' @export summary.bsrr
+summary.bsrr <-function(object, ...){
+  if(is.null(object$bsrr.one)){
     df <- sum(object$beta != 0)
     predictors <- names(which(object$beta!=0))
     a <- rbind(predictors, object$beta[predictors])
@@ -111,7 +134,7 @@ summary.bess <-function(object, ...){
 
     if(deviance(object)>=0)
       cat("    deviance:         ", deviance(object),"\n") else cat("    deviance:        ", deviance(object),"\n")
-    if(is.null(object$bess.one)){
+    if(is.null(object$bsrr.one)){
       if(object$ic.type %in% c("AIC", "BIC", "GIC")){
         if(object$ic>=0)
           cat("    ", object$ic.type, ":               ", object$ic,"\n", sep = "") else cat("    ",object$ic.type,":             ", object$ic,"\n", sep = "")

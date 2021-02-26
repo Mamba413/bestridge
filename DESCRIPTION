@@ -1,28 +1,24 @@
-Package: BeSS
+Package: bestridge
 Type: Package
-Title: Best Subset Selection /Ridge Regression in Linear, Logistic, Poisson and CoxPH Models
-Version: 2.0.2
+Title: Best Subset Ridge Regression in Linear, Logistic, Poisson and CoxPH Models
+Version: 1.0.2
 Date: 2021-01-23
 Authors@R: c(
-  person(given = "Canhong", family = "Wen", email = "wencanhong@gmail.com", role = c("aut", "cre")),
-  person(given = "Aijun", family = "Zhang", email = "ajzhang@hku.hk", role = c("aut")),
-  person(given = "Shijie", family = "Quan", email = "329773935@qq.com", role = c("aut")),
-  person(given = "Liyuan", family = "Hu", email = "1249096170@qq.com", role = c("aut")),
+  person(given = "Liyuan", family = "Hu", email = "huly5@mail2.sysu.edu.cn", role = c("aut", "cre")),
   person(given = "Kangkang", family = "Jiang", email = "jiangkk3@mail2.sysu.edu.cn" ,role = c("aut")),
   person(given = "Yanhang", family = "Zhang", email = "zhangyh98@ruc.edu.cn", role = c("aut")),
   person(given = "Jin", family = "Zhu", email = "zhuj37@mail2.sysu.edu.cn", role = c("aut")),
-  person(given = "Xueqin", family = "Wang", email = "wangxq20@ustc.edu.cn", role = c("aut")))
+  person(given = "Xueqin", family = "Wang", email = "wangxq20@ustc.edu.cn", role = c("aut")),
+  person(given = "Canhong", family = "Wen", email = "wencanhong@gmail.com", role = c("aut")))
 Author: 
-  Canhong Wen [aut, cre],
-  Aijun Zhang [aut],
-  Shijie Quan [aut],
-  Liyuan Hu [aut],
+  Liyuan Hu [aut, cre],
   Kangkang Jiang [aut],
   Yanhang Zhang [aut],
   Jin Zhu [aut],
-  Xueqin Wang [aut]
-Maintainer:  Canhong Wen <wencanhong@gmail.com>
-Description: An implementation of best subset selection in generalized linear model and Cox proportional hazard model via the primal dual active set algorithm proposed by Wen, C., Zhang, A., Quan, S. and Wang, X. (2020) <doi:10.18637/jss.v094.i04>. The algorithm formulates coefficient parameters and residuals as primal and dual variables and utilizes efficient active set selection strategies based on the complementarity of the primal and dual variables.
+  Xueqin Wang [aut],
+  Canhong Wen [aut]
+Maintainer:  Liyuan Hu <huly5@mail2.sysu.edu.cn>
+Description: An implementation of best subset ridge regression in generalized linear model and Cox proportional hazard model via the primal dual active set algorithm proposed by Wen, C., Zhang, A., Quan, S. and Wang, X. (2020) <doi:10.18637/jss.v094.i04>. The algorithm formulates coefficient parameters and residuals as primal and dual variables and utilizes efficient active set selection strategies based on the complementarity of the primal and dual variables.
 License: GPL-3
 Depends: R (>= 3.5.0)
 Encoding: UTF-8
@@ -35,5 +31,3 @@ Suggests:
     HCmodelSets,
     rmarkdown
 VignetteBuilder: knitr
-URL: https://github.com/Mamba413/bess
-BugReports: https://github.com/Mamba413/bess/issues

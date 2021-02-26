@@ -4,6 +4,6 @@
 #' Package for Best Subset Selection in Linear, Logistic and Cox Proportional
 #' Hazards Models, \emph{Journal of Statistical Software}, Vol. 94(4).
 #' doi:10.18637/jss.v094.i04.
-#' @rdname BeSS-package
-#' @useDynLib BeSS, .registration=TRUE
+#' @rdname bestridge-package
+#' @useDynLib bestridge, .registration=TRUE
 "_PACKAGE"

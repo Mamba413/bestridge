@@ -5,6 +5,8 @@
 
 0 errors | 0 warnings | 0 note
 
-## Bug fix
+## Mendings
 
-We have correct the problems shown on <https://www.r-project.org/nosvn/R.check/r-patched-solaris-x86/BeSS-00check.html>
+* We add output information in all .Rd files.
+
+* We use on.exit to make sure we do not change users' par in 'plot.bsrr'.

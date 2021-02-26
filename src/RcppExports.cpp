@@ -8,7 +8,7 @@ using namespace Rcpp;
 
 // bessCpp
 List bessCpp(Eigen::MatrixXd x, Eigen::VectorXd y, int data_type, Eigen::VectorXd weight, bool is_normal, int algorithm_type, int model_type, int max_iter, int exchange_num, int path_type, bool is_warm_start, int ic_type, bool is_cv, int K, Eigen::VectorXd state, Eigen::VectorXi sequence, Eigen::VectorXd lambda_seq, int s_min, int s_max, int K_max, double epsilon, double lambda_min, double lambda_max, int nlambda, bool is_screening, int screening_size, int powell_path, Eigen::VectorXi g_index, Eigen::VectorXi always_select, double tao);
-RcppExport SEXP _BeSS_bessCpp(SEXP xSEXP, SEXP ySEXP, SEXP data_typeSEXP, SEXP weightSEXP, SEXP is_normalSEXP, SEXP algorithm_typeSEXP, SEXP model_typeSEXP, SEXP max_iterSEXP, SEXP exchange_numSEXP, SEXP path_typeSEXP, SEXP is_warm_startSEXP, SEXP ic_typeSEXP, SEXP is_cvSEXP, SEXP KSEXP, SEXP stateSEXP, SEXP sequenceSEXP, SEXP lambda_seqSEXP, SEXP s_minSEXP, SEXP s_maxSEXP, SEXP K_maxSEXP, SEXP epsilonSEXP, SEXP lambda_minSEXP, SEXP lambda_maxSEXP, SEXP nlambdaSEXP, SEXP is_screeningSEXP, SEXP screening_sizeSEXP, SEXP powell_pathSEXP, SEXP g_indexSEXP, SEXP always_selectSEXP, SEXP taoSEXP) {
+RcppExport SEXP _bestridge_bessCpp(SEXP xSEXP, SEXP ySEXP, SEXP data_typeSEXP, SEXP weightSEXP, SEXP is_normalSEXP, SEXP algorithm_typeSEXP, SEXP model_typeSEXP, SEXP max_iterSEXP, SEXP exchange_numSEXP, SEXP path_typeSEXP, SEXP is_warm_startSEXP, SEXP ic_typeSEXP, SEXP is_cvSEXP, SEXP KSEXP, SEXP stateSEXP, SEXP sequenceSEXP, SEXP lambda_seqSEXP, SEXP s_minSEXP, SEXP s_maxSEXP, SEXP K_maxSEXP, SEXP epsilonSEXP, SEXP lambda_minSEXP, SEXP lambda_maxSEXP, SEXP nlambdaSEXP, SEXP is_screeningSEXP, SEXP screening_sizeSEXP, SEXP powell_pathSEXP, SEXP g_indexSEXP, SEXP always_selectSEXP, SEXP taoSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -48,11 +48,11 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_BeSS_bessCpp", (DL_FUNC) &_BeSS_bessCpp, 30},
+    {"_bestridge_bessCpp", (DL_FUNC) &_bestridge_bessCpp, 30},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_BeSS(DllInfo *dll) {
+RcppExport void R_init_bestridge(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }

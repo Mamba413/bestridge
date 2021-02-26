@@ -1,19 +1,21 @@
-#' print method for a "bess" object
+#' print method for a "bsrr" object
 #'
-#' Print the primary elements of the "\code{bess}" object.
+#' Print the primary elements of the "\code{bsrr}" object.
 #'
 #' prints the fitted model and returns it invisibly.
 #'
-#' @param x A "\code{bess}" object.
+#' @param x A "\code{bsrr}" object.
 #' @param digits Minimum number of significant digits to be used.
 #' @param nonzero Whether the output should only contain the non-zero coefficients.
 #' @param \dots additional print arguments
 #' @author Canhong Wen, Aijun Zhang, Shijie Quan, Liyuan Hu, Kangkang Jiang, Yanhang Zhang, Jin Zhu and Xueqin Wang.
-#' @seealso \code{\link{bess}}, \code{\link{coef.bess}}.
+#' @seealso \code{\link{bsrr}}, \code{\link{coef.bsrr}}.
 #' @references Wen, C., Zhang, A., Quan, S. and Wang, X. (2020). BeSS: An R
 #' Package for Best Subset Selection in Linear, Logistic and Cox Proportional
 #' Hazards Models, \emph{Journal of Statistical Software}, Vol. 94(4).
 #' doi:10.18637/jss.v094.i04.
+#' @return
+#' No return value, called for side effect
 #' @examples
 #'
 #' # Generate simulated data
@@ -25,18 +27,16 @@
 #' Tbeta <- rep(0, p)
 #' Tbeta[1:k*floor(p/k):floor(p/k)] <- rep(1, k)
 #' Data = gen.data(n, p, k, rho, family = "gaussian", beta = Tbeta, seed=seed)
-#' lm.bss = bess(Data$x, Data$y, method = "sequential")
 #' lambda.list = exp(seq(log(5), log(0.1), length.out = 10))
-#' lm.bsrr = bess(Data$x, Data$y, type = "bsrr", lambda.list = lambda.list, method = "sequential")
+#' lm.bsrr = bsrr(Data$x, Data$y, lambda.list = lambda.list, method = "sequential")
 #'
-#' print(lm.bss)
 #' print(lm.bsrr)
 #'
-#'@method print bess
+#'@method print bsrr
 #'@export
-#'@export print.bess
+#'@export print.bsrr
 #'
-print.bess<-function(x, digits = max(5, getOption("digits") - 5), nonzero = FALSE,...)
+print.bsrr<-function(x, digits = max(5, getOption("digits") - 5), nonzero = FALSE,...)
 {
   # if(x$method != "sequential"){
   #   if(x$algorithm_type != "L0L2"){

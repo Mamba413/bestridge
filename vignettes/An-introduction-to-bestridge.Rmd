@@ -1,8 +1,8 @@
 ---
-title: "An introduction to `BeSS`"
+title: "An introduction to `bestridge`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{An introduction to BeSS}
+  %\VignetteIndexEntry{An introduction to bestridge}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
   %\VignetteDepends{HCmodelSets}
@@ -22,10 +22,9 @@ knitr::opts_chunk$set(
 
 One of the main tasks of statistical modeling is to exploit the association between a response variable and multiple predictors. The linear model (LM), a simple parametric regression model, is often used to capture linear dependence between response and predictors. As the extensions of the linear model, the other two common models: generalized linear model (GLM) and Cox's proportional hazards (CoxPH) model, depending on the types of responses, are modeled with mean linear to the inputs. When the number of predictors is large, parameter estimations in these models can be computationally burdensome. At the same time, a Widely accepted heuristic rule for statistical modeling is Occam's razor, which asks modelers to keep a good balance between the goodness of fit and model complexity, leading to a relatively small subset of important predictors.
 
- `BeSS` is a toolkit for best subset selection (BSS) problems and the best subset ridge regression (BSRR) problems. Under many sparse learning regimes, $L_0$ regularization can outperform commonly used feature selection methods (e.g., $L_1$ and MCP). We state the two problems as
+ `bestridge` is a toolkit for the best subset ridge regression (BSRR) problems. Under many sparse learning regimes, $L_0$ regularization can outperform commonly used feature selection methods (e.g., $L_1$ and MCP). We state the problem as
 
  \begin{align*}
- \min_\beta& -2 \log L(\beta) \quad s.t. \|\beta\|_0 \leq s \quad&(BSS)\\
     \min_\beta& -2 \log L(\beta) + \lambda\Vert\beta\Vert_2^2 \quad s.t. \|\beta\|_0 \leq s \quad&(BSRR)\\
 
  \end{align*}
@@ -34,7 +33,7 @@ One of the main tasks of statistical modeling is to exploit the association betw
   The fitting is done over a grid of sparsity $s$ and $\lambda$ values to generate a regularization path. For each candidate model size and $\lambda$, the best subset ridge regression is solved by the $L_2$ penalized primal-dual active set algorithm. This algorithm utilizes an active set updating strategy via primal and dual variables and fits the sub-model by exploiting the fact that their support sets are non-overlap and complementary. For the case of `method = "sequential"` if `warms.start = "TRUE"`,  we run this algorithm for a list of sequential combination of model sizes and $\lambda$ and use the estimate from the last iteration as a warm start. For the case of `method = "psequential"` and `method = "pgsection"`, the Powell conjugate direction method is implemented. This method finds the optimal parameters by a bi-directional search along each search vector, in turn. The bi-directional line search along each search vector can be done by sequential search path or golden section search, the line search method of which is specified by `method = "psequential"` or `method = "pgsection"`. 
 
 
-## 2 Quick start (for BSRR)
+## 2 Quick start
 This quick start guide walks you through the implementation of the best subset ridge regression on linear and logistic models.
 
 ### 2.1 Regression: linear model
@@ -42,19 +41,19 @@ This quick start guide walks you through the implementation of the best subset r
 We apply the methods to the data set reported in @scheetz2006regulation, 
 <!-- and is available in package **picasso**,  -->
 which contains gene expression levels of 18975 probes obtained from 120 rats. We are interested in finding probes that are related to that of gene TRIM32 using linear regression. This gene had been known to cause Bardet-Biedl syndrome, which is a genetic disease of multiple organ systems including the retina. 
-For simplicity, the number of probes is reduced to 500 by picking out maximum 500 marginal correaltion to Trim32 gene.
+For simplicity, the number of probes is reduced to 500 by picking out maximum 500 marginal correalation to Trim32 gene.
 <!-- We take the probe from TRIM32, 1389163\_at, as the response variable, and the remaining 18975 probes predictors. Consequently, the number of dimension $p=18975$ is much greater than the number of observations $n=120$.  -->
 
 ```{r, warning=F, message=FALSE, eval=TRUE}
-library(BeSS)
-data("trim32", package = "BeSS")
+library(bestridge)
+data("trim32", package = "bestridge")
 ```
 
-Supposed we wants to fit a best subset ridge regression model with $\lambda$ taking values in 100 grid points from 100 to 0.01 and the model size between $\max \{p, n/\log(n)\}$ (the decimal portion is rounded) and 1, which is the default model size range where $p$ denotes the number of total variables and $n$ the sample size, via Generalized Information Criterion. We call the `bess` function as follows:
+Supposed we wants to fit a best subset ridge regression model with $\lambda$ taking values in 100 grid points from 100 to 0.001 and the model size between $\max \{p, n/\log(n)\}$ (the decimal portion is rounded) and 1, which is the default model size range where $p$ denotes the number of total variables and $n$ the sample size, via Generalized Information Criterion. We call the `bsrr` function as follows:
 ```{r}
 y <- trim32[, 1]
 x <- as.matrix(trim32[, -1])
-lm.bsrr <- bess(x, y, type = "bsrr")
+lm.bsrr <- bsrr(x, y)
 ```
 
 The fitted coefficients can be extracted by running the `coef` function. 
@@ -76,12 +75,12 @@ y <- duke$y
 x <- as.matrix(duke[, -1])
 ```
 
-Supposed we wants to do this classification based on logistic regression with a BSRR model. This can be realized through calling the `bess` function with the parameter `family = "binomial` as follows:
+Supposed we wants to do this classification based on logistic regression with a BSRR model. This can be realized through calling the `bsrr` function with the parameter `family = "binomial` as follows:
 ```{r}
-logi.bsrr <- bess(x, y, family = "binomial", type = "bsrr")
+logi.bsrr <- bsrr(x, y, family = "binomial")
 ```
 
-Calling the `plot` routine on an `bess` object fitted by `type = "bsrr"` will provide a heatmap of GIC of the fitted path. 
+Calling the `plot` routine on an `bsrr` object fitted by `type = "bsrr"` will provide a heatmap of GIC of the fitted path. 
 ```{r}
 plot(logi.bsrr)
 ```
@@ -130,7 +129,7 @@ plot(logi.bsrr)
 
 ### 3.1 Censored response: Cox proportional hazard model
 
-The `BeSS` package also supports studying the relationship between predictors variables and survival time based on the Cox proportional hazard model. We now demonstrate the usage on a real data set, Alizadeh, Eisen, Davis, Ma, Lossos, Rosenwald, Boldrick, Sabet, Tran, Yu et al. (2000)[@alizadeh2000distinct]: gene-expression data in lymphoma patients. There were 240 patients with measurements on 7399 probes.
+The `bestridge` package also supports studying the relationship between predictors variables and survival time based on the Cox proportional hazard model. We now demonstrate the usage on a real data set, Alizadeh, Eisen, Davis, Ma, Lossos, Rosenwald, Boldrick, Sabet, Tran, Yu et al. (2000)[@alizadeh2000distinct]: gene-expression data in lymphoma patients. There were 240 patients with measurements on 7399 probes.
 ```{r, warning=FALSE, message = FALSE}
 data(LymphomaData, package = "HCmodelSets")
 
@@ -139,12 +138,12 @@ y <- patient.data$time
 status <- patient.data$status
 ```
 
-To implement the best subset ridge regression on the Cox proportional hazard model, call the `bess` function with `family` specified to be `"cox"`.
+To implement the best subset ridge regression on the Cox proportional hazard model, call the `bestridge` function with `family` specified to be `"cox"`.
 ```{r}
-cox.bsrr <- bess(x, cbind(y, status), family = "cox", type = "bsrr")
+cox.bsrr <- bsrr(x, cbind(y, status), family = "cox")
 ```
 
-We use the `summary` function to draw a summary of the fitted `bess` object. 28 probes among the total 7399 are selected according to the result.
+We use the `summary` function to draw a summary of the fitted `bsrr` object. 28 probes among the total 7399 are selected according to the result.
 ```{r}
 summary(cox.bsrr)
 ```
@@ -155,17 +154,17 @@ summary(cox.bsrr)
     
     + Cross-validation
     
-  So far, we have been stick to the default Generalized Information Criterion for tuning parameter selections. In this package, we provide a bunch of criteria including the Akaike information criterion [@akaike1974new] and Bayesian information criterion [@schwarz1978estimating], Generalized Information Criterion [@konishi1996generalised], and extended BIC [@chen2008extended; @chen2012extended], as well as cross-validation. By default, `bess` selects the tuning parameters according to the Generalized Information Criterion.     
+  So far, we have been stick to the default Generalized Information Criterion for tuning parameter selections. In this package, we provide a bunch of criteria including the Akaike information criterion [@akaike1974new] and Bayesian information criterion [@schwarz1978estimating], Generalized Information Criterion [@konishi1996generalised], and extended BIC [@chen2008extended; @chen2012extended], as well as cross-validation. By default, `bsrr` selects the tuning parameters according to the Generalized Information Criterion.     
   
-  To choose one of the information criteria to select the optimal values of model size $s$ and shrinkage $\lambda$, the input value `tune` in the `bess` function needs to be specified: 
+  To choose one of the information criteria to select the optimal values of model size $s$ and shrinkage $\lambda$, the input value `tune` in the `bsrr` function needs to be specified: 
     
 ```{r, eval=F}
-lm.bsrr.ebic <- bess(x, y, type = "bsrr", tune = "ebic")
+lm.bsrr.ebic <- bsrr(x, y, tune = "ebic")
 ```
 
 To use cross-validation for parameter selections, set the input value of `tune = "cv"`. By default, 5-fold cross-validation will be conducted. 
 ```{r, eval=F}
-lm.bsrr.cv <- bess(x, y, type = "bsrr", tune = "cv", nfolds = 5)
+lm.bsrr.cv <- bsrr(x, y, tune = "cv", nfolds = 5)
 ```
 
 ### 3.3 Paths for tuning parameters selection
@@ -184,7 +183,7 @@ To conduct parameter selections sequentially, users should specify the method to
 my.lambda.list <- exp(seq(log(10), log(0.01), length.out = 10))
 my.s.list <- 1:10
 
-lm.bsrr.seq <- bess(x, y, type = "bsrr", method = "sequential", s.list = my.s.list,
+lm.bsrr.seq <- bsrr(x, y, method = "sequential", s.list = my.s.list,
                    lambda.list = my.lambda.list)
 ```
 
@@ -195,7 +194,7 @@ my.s.max <- 10
 my.lambda.min <- 0.01
 my.lambda.max <- 10
 
-lm.bsrr.powell <- bess(x, y, type = "bsrr", method = "pgsection", 
+lm.bsrr.powell <- bsrr(x, y, method = "pgsection", 
                       s.min = my.s.min, s.max = my.s.max, 
                       lambda.min = my.lambda.min, lambda.max = my.lambda.max)
 ```
@@ -204,7 +203,7 @@ lm.bsrr.powell <- bess(x, y, type = "bsrr", method = "pgsection",
 
 We also provide feature screening option to deal with ultrahigh dimensional data for computational and statistical efficiency. Users can apply the sure independence screening method [@saldana2018sis] based on maximum marginal likelihood estimators, to pre-exclude some irrelevant variables before fitting a model by pressing a integer to `screening.num`. The SIS will filter a set of variables with size equals to `screening.num`. Then the active set updates are restricted on this set of variables.
 ```{r, eval=F}
-lm.bsrr.screening <- bess(x, y, type = "bsrr", screening.num = round(nrow(x)/log(nrow(x))))
+lm.bsrr.screening <- bsrr(x, y, screening.num = round(nrow(x)/log(nrow(x))))
 ```
 
 ## 4 Monte carol study
@@ -219,7 +218,7 @@ we compare the performance of the following methods:
 
 i. (BSRR methods): Tuning parameters selected through a sequential path and the Powell method. Denoted as Grid-BSRR and Powell-BSRR.
 
-ii. (BSS method): The best subset selection method. We consider the primal-dual active subset selection method and use our own implementation in `BeSS` package.
+ii. (BSS method): The best subset selection method. We consider the primal-dual active subset selection method and use our own implementation in `bestridge` package.
 
 iii. ($L_1$ method): Lasso estimator. We use the implementation of **glmnet**.
 
@@ -250,7 +249,7 @@ Results for linear regression are reported in Figure 2. The result shows that as
 
 ## 5 Conclusion
 
-In the `BeSS` toolkit, we introduce the best subset ridge regression for solving the $L_2$ regularized best subset selection problem. The $L_2$ penalized PDAS algorithm allows identification of the best sub-model with a prespecified model size and shrinkage via a primal-dual formulation of feasible solutions. To determine the best sub-model over all possible model sizes and shrinkage parameters, both a sequential search method and a powell search method are provided. We find that estimators BSRR models do a better job than the BSS estimator and usually outperform other variable selection methods in prediction, estimation and variable selection. 
+In the `bestridge` toolkit, we introduce the best subset ridge regression for solving the $L_2$ regularized best subset selection problem. The $L_2$ penalized PDAS algorithm allows identification of the best sub-model with a prespecified model size and shrinkage via a primal-dual formulation of feasible solutions. To determine the best sub-model over all possible model sizes and shrinkage parameters, both a sequential search method and a powell search method are provided. We find that estimators BSRR models do a better job than the BSS estimator and usually outperform other variable selection methods in prediction, estimation and variable selection. 
 
 ## References
 

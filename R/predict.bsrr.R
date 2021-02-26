@@ -1,9 +1,9 @@
-#' make predictions from a "bess" object.
+#' make predictions from a "bsrr" object.
 #'
 #' Returns predictions from a fitted
-#' "\code{bess}" object.
+#' "\code{bsrr}" object.
 #'
-#' @param object Output from the \code{bess} function.
+#' @param object Output from the \code{bsrr} function.
 #' @param newx New data used for prediction. If omitted, the fitted linear predictors are used.
 #' @param type \code{type = "link"} gives the linear predictors for \code{"binomial"},
 #' \code{"poisson"} or \code{"cox"} models; for \code{"gaussian"} models it gives the
@@ -13,7 +13,7 @@
 #' @param \dots Additional arguments affecting the predictions produced.
 #' @return The object returned depends on the types of family.
 #' @author Canhong Wen, Aijun Zhang, Shijie Quan, Liyuan Hu, Kangkang Jiang, Yanhang Zhang, Jin Zhu and Xueqin Wang.
-#' @seealso \code{\link{bess}}.
+#' @seealso \code{\link{bsrr}}.
 #' @references Wen, C., Zhang, A., Quan, S. and Wang, X. (2020). BeSS: An R
 #' Package for Best Subset Selection in Linear, Logistic and Cox Proportional
 #' Hazards Models, \emph{Journal of Statistical Software}, Vol. 94(4).
@@ -34,11 +34,9 @@
 #' y <- Data$y[1:140]
 #' x_new <- Data$x[141:200, ]
 #' y_new <- Data$y[141:200]
-#' lm.bss <- bess(x, y, method = "sequential")
 #' lambda.list <- exp(seq(log(5), log(0.1), length.out = 10))
-#' lm.bsrr <- bess(x, y, type = "bsrr", method = "pgsection")
+#' lm.bsrr <- bsrr(x, y, method = "pgsection")
 #'
-#' pred.bss <- predict(lm.bss, newx = x_new)
 #' pred.bsrr <- predict(lm.bsrr, newx = x_new)
 #'
 #' #-------------------logistic model----------------------#
@@ -49,12 +47,10 @@
 #' y <- Data$y[1:140]
 #' x_new <- Data$x[141:200, ]
 #' y_new <- Data$y[141:200]
-#' logi.bss <- bess(x, y, family = "binomial", method = "sequential", tune = "cv")
 #' lambda.list <- exp(seq(log(5), log(0.1), length.out = 10))
-#' logi.bsrr <- bess(x, y, type = "bsrr", tune="cv",
+#' logi.bsrr <- bsrr(x, y, tune="cv",
 #'                  family = "binomial", lambda.list = lambda.list, method = "sequential")
 #'
-#' pred.bss <- predict(logi.bss, newx = x_new)
 #' pred.bsrr <- predict(logi.bsrr, newx = x_new)
 #'
 #' #-------------------coxph model----------------------#
@@ -65,11 +61,9 @@
 #' y <- Data$y[1:140, ]
 #' x_new <- Data$x[141:200, ]
 #' y_new <- Data$y[141:200, ]
-#' cox.bss <- bess(x, y, family = "cox", method = "sequential")
 #' lambda.list <- exp(seq(log(5), log(0.1), length.out = 10))
-#' cox.bsrr <- bess(x, y, type = "bsrr", family = "cox", lambda.list = lambda.list)
+#' cox.bsrr <- bsrr(x, y, family = "cox", lambda.list = lambda.list)
 #'
-#' pred.bss <- predict(cox.bss, newx = x_new)
 #' pred.bsrr <- predict(cox.bsrr, newx = x_new)
 #'
 #'#-------------------group selection----------------------#
@@ -80,16 +74,14 @@
 #'
 #'group.index <- c(rep(1, 2), rep(2, 3), rep(3, 2), rep(4, 3),
 #'                 rep(5, 2), rep(6, 3), rep(7, 2), rep(8, 3))
-#'lm.group <- bess(x, y, s.min=1, s.max = 8, type = "bss", group.index = group.index)
-#'lm.groupbsrr <- bess(x, y, type = "bsrr", s.min = 1, s.max = 8, group.index = group.index)
+#'lm.groupbsrr <- bsrr(x, y, s.min = 1, s.max = 8, group.index = group.index)
 #'
-#'pred.group <- predict(lm.group, newx = x_new)
 #'pred.groupbsrr <- predict(lm.groupbsrr, newx = x_new)
 #'
-#'@method predict bess
+#'@method predict bsrr
 #'@export
-#'@export predict.bess
-predict.bess <- function(object, newx, type = c("link", "response"), ...)
+#'@export predict.bsrr
+predict.bsrr <- function(object, newx, type = c("link", "response"), ...)
 {
   # if(!is.null(object$factor)){
   #   factor <- c(object$factor)

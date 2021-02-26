@@ -1,31 +1,27 @@
-#' Best subset selection
+#' Best subset ridge regression
 #'
-#' Best subset selection for generalized linear model and Cox's proportional
+#' Best subset ridge regression for generalized linear model and Cox's proportional
 #' model.
 #'
-#' The best subset selection problem with model size \eqn{s} is
-#' \deqn{\min_\beta -2 \log L(\beta) \;\;{\rm s.t.}\;\; \|\beta\|_0 \leq s.} In
-#' the GLM case, \eqn{\log L(\beta)} is the log-likelihood function; In the Cox
-#' model, \eqn{\log L(\beta)} is the log partial likelihood function.
-#'
-#' The best ridge regression problem with model size \eqn{s} is
+#' The best ridge regression problem with model size \eqn{s} and the shrinkage parameter \eqn{\lambda} is
 #' \deqn{\min_\beta -2 \log L(\beta) + \lambda\Vert\beta\Vert_2^2 \;\;{\rm
 #' s.t.}\;\; \|\beta\|_0 \leq s.} In the GLM case, \eqn{\log L(\beta)} is the
 #' log likelihood function; In the Cox model, \eqn{\log L(\beta)} is the log
 #' partial likelihood function.
 #'
-#' For each candidate model size and \eqn{\lambda}, the best subset selection and the best subset ridge regression
-#' problems are solved by the primal-dual active set (PDAS) algorithm, see Wen et
+#' The best subset selection problem is a special case of the best ridge regression problem
+#' with the shrinkage \eqn{\lambda=0}.
+#'
+#' For each candidate model size and \eqn{\lambda}, the best subset ridge regression
+#' problems are solved by the \eqn{L_2} penalized primal-dual active set (PDAS) algorithm, see Wen et
 #' al (2020) for details. This algorithm
 #' utilizes an active set updating strategy via primal and dual variables and
 #' fits the sub-model by exploiting the fact that their support sets are
 #' non-overlap and complementary. For the case of \code{method = "sequential"}
 #' if \code{warm.start = "TRUE"}, we run the PDAS algorithm for a list of
 #' sequential model sizes and use the estimate from the last iteration as a
-#' warm start. For the case of \code{method = "gsection"} of the best subset
-#' selection problem, a golden section search technique is adopted to
-#' determine the optimal model size efficiently. And for the case of
-#' \code{ method = "psequential"} and \code{method = "pgsection"}of the best ridge regression problem, the Powell method
+#' warm start. For the case of
+#' \code{ method = "psequential"} and \code{method = "pgsection"}, the Powell method
 #' using a sequential line search method or a golden section search technique is
 #' used for parameters determination.
 #' @param x Input matrix, of dimension \eqn{n \times p}; each row is an observation
@@ -34,19 +30,12 @@
 #' a factor with two levels. For \code{family="poisson"}, \code{y} should be a vector with positive integer.
 #'  For \code{family = "cox"}, \code{y} should be a two-column matrix
 #' with columns named \code{time} and \code{status}.
-#' @param type One of the two types of problems.
-#' \code{type = "bss"} for the best subset selection,
-#' and \code{type = "bsrr"} for the best subset ridge regression.
 #' @param family One of the following models: \code{"gaussian"}, \code{"binomial"},
 #' \code{"poisson"}, or \code{"cox"}. Depending on the response. Any unambiguous substring can be given.
 #' @param method The method to be used to select the optimal model size and \eqn{L_2} shrinkage. For
-#' \code{method = "sequential"}, we solve the best subset selection and the best subset ridge regression
-#' problem for each \code{s} in \code{1,2,...,s.max} and \eqn{\lambda} in \code{lambda.list}. For \code{method =
-#' "gsection"}, which is only valid for \code{type = "bss"},
-#' we solve the best subset selection problem with model size ranged between s.min and s.max,
-#' where the specific model size to be considered is determined by golden section. we
-#' solve the best subset selection problem with a range of non-continuous model
-#' sizes. For \code{method = "pgsection"} and \code{"psequential"}, the Powell method is used to
+#' \code{method = "sequential"}, we solve the best subset ridge regression
+#' problem for each \code{s} in \code{1,2,...,s.max} and \eqn{\lambda} in \code{lambda.list}.
+#' For \code{method = "pgsection"} and \code{"psequential"}, the Powell method is used to
 #' solve the best subset ridge regression problem. Any unambiguous substring can be given.
 #' @param tune The criterion for choosing the model size and \eqn{L_2} shrinkage
 #' parameters. Available options are \code{"gic"}, \code{"ebic"}, \code{"bic"}, \code{"aic"} and \code{"cv"}.
@@ -54,16 +43,15 @@
 #' @param s.list An increasing list of sequential values representing the model
 #' sizes. Only used for \code{method = "sequential"}. Default is \code{1:min(p,
 #' round(n/log(n)))}.
-#' @param lambda.list A lambda sequence for \code{"bsrr"}. Default is
+#' @param lambda.list A lambda sequence for \code{"bsrr"}. Only used for \code{method = "sequential"}. Default is
 #' \code{exp(seq(log(100), log(0.01), length.out = 100))}.
-#' @param s.min The minimum value of model sizes. Only used for \code{method =
-#' "gsection"}, \code{"psequential"} and \code{"pgsection"}. Default is 1.
-#' @param s.max The maximum value of model sizes. Only used for \code{method =
-#' "gsection"}, \code{"psequential"} and \code{"pgsection"}. Default is \code{min(p, round(n/log(n)))}.
+#' @param s.min The minimum value of model sizes. Only used for \code{"psequential"} and \code{"pgsection"}. Default is 1.
+#' @param s.max The maximum value of model sizes. Only used for \code{"psequential"} and \code{"pgsection"}.
+#'  Default is \code{min(p, round(n/log(n)))}.
 #' @param lambda.min The minimum value of lambda. Only used for \code{method =
-#' "powell"}. Default is \code{0.001}.
+#' "psequential"} and \code{"pgsection"}. Default is \code{0.001}.
 #' @param lambda.max The maximum value of lambda. Only used for \code{method =
-#' "powell"}. Default is \code{100}.
+#' "psequential"} and \code{"pgsection"}. Default is \code{100}.
 #' @param nlambda The number of \eqn{\lambda}s for the Powell path with sequential line search method.
 #' Only valid for \code{method = "psequential"}.
 #' @param always.include An integer vector containing the indexes of variables that should always be included in the model.
@@ -79,7 +67,7 @@
 #' If \code{normalize = NULL}, by default, \code{normalize} will be set \code{1} for \code{"gaussian"},
 #' \code{2} for \code{"binomial"} and \code{"poisson"}, \code{3} for \code{"cox"}.
 #' @param weight Observation weights. Default is \code{1} for each observation.
-#' @param max.iter The maximum number of iterations in the bess function.
+#' @param max.iter The maximum number of iterations in the \code{bsrr} function.
 #' In most of the case, only a few steps can guarantee the convergence. Default
 #' is \code{20}.
 #' @param warm.start Whether to use the last solution as a warm start. Default
@@ -92,11 +80,10 @@
 #' If you do not fit a model with a group structure,
 #' please set \code{group.index = NULL}. Default is \code{NULL}.
 #' @param seed Seed to be used to devide the sample into K cross-validation folds. Default is \code{NULL}.
-#' @return A list with class attribute 'bess' and named components:
+#' @return A list with class attribute 'bsrr' and named components:
 #' \item{beta}{The best fitting coefficients.}
 #'  \item{coef0}{The best fitting
 #' intercept.}
-#' \item{bestmodel}{The best fitted model for \code{type = "bss"}, the class of which is \code{"lm"}, \code{"glm"} or \code{"coxph"}.}
 #' \item{loss}{The training loss of the best fitting model.}
 #' \item{ic}{The information criterion of the best fitting model when model
 #' selection is based on a certain information criterion.} \item{cvm}{The mean
@@ -104,43 +91,43 @@
 #' based on the cross-validation.}
 #'
 #' \item{lambda}{The lambda chosen for the best fitting model}
-#' \item{beta.all}{For \code{bess} objects obtained by \code{gsection}, \code{pgsection}
+#' \item{beta.all}{For \code{bsrr} objects obtained by \code{gsection}, \code{pgsection}
 #' and \code{psequential}, \code{beta.all} is a matrix with each column be the coefficients
 #' of the model in each iterative step in the tuning path.
-#' For \code{bess} objects obtained by \code{sequential} method,
+#' For \code{bsrr} objects obtained by \code{sequential} method,
 #' A list of the best fitting coefficients of size
 #' \code{s=0,1,...,p} and \eqn{\lambda} in \code{lambda.list} with the
-#' smallest loss function. For \code{"bess"} objects of \code{"bsrr"} type, the fitting coefficients of the
+#' smallest loss function. For \code{"bsrr"} objects of \code{"bsrr"} type, the fitting coefficients of the
 #' \eqn{i^{th} \lambda} and the \eqn{j^{th}} \code{s} are at the \eqn{i^{th}}
 #' list component's \eqn{j^{th}} column.}
-#' \item{coef0.all}{For \code{bess} objects obtained from \code{gsection}, \code{pgsection} and \code{psequential},
+#' \item{coef0.all}{For \code{bsrr} objects obtained from \code{gsection}, \code{pgsection} and \code{psequential},
 #' \code{coef0.all} contains the intercept for the model in each iterative step in the tuning path.
-#' For \code{bess} objects obtained from \code{sequential} path,
+#' For \code{bsrr} objects obtained from \code{sequential} path,
 #' \code{coef0.all} contains the best fitting
 #' intercepts of size \eqn{s=0,1,\dots,p} and \eqn{\lambda} in
 #' \code{lambda.list} with the smallest loss function.}
-#' \item{loss.all}{For \code{bess} objects obtained from \code{gsection}, \code{pgsection} and \code{psequential},
+#' \item{loss.all}{For \code{bsrr} objects obtained from \code{gsection}, \code{pgsection} and \code{psequential},
 #' \code{loss.all} contains the training loss of the model in each iterative step in the tuning path.
-#' For \code{bess} objects obtained from \code{sequential} path, this is a
+#' For \code{bsrr} objects obtained from \code{sequential} path, this is a
 #' list of the training loss of the best fitting intercepts of model size
-#' \eqn{s=0,1,\dots,p} and \eqn{\lambda} in \code{lambda.list}. For \code{"bess"} object obtained by \code{"bsrr"},
+#' \eqn{s=0,1,\dots,p} and \eqn{\lambda} in \code{lambda.list}. For \code{"bsrr"} object obtained by \code{"bsrr"},
 #' the training loss of the \eqn{i^{th} \lambda} and the \eqn{j^{th}} \code{s}
 #' is at the \eqn{i^{th}} list component's \eqn{j^{th}} entry.}
-#' \item{ic.all}{For \code{bess} objects obtained from \code{gsection}, \code{pgsection} and \code{psequential},
+#' \item{ic.all}{For \code{bsrr} objects obtained from \code{gsection}, \code{pgsection} and \code{psequential},
 #' \code{ic.all} contains the values of the chosen information criterion of the model in each iterative step in the tuning path.
-#' For \code{bess} objects obtained from \code{sequential} path, this is a
+#' For \code{bsrr} objects obtained from \code{sequential} path, this is a
 #' matrix of the values of the chosen information criterion of model size \eqn{s=0,1,\dots,p}
-#' and \eqn{\lambda} in \code{lambda.list} with the smallest loss function. For \code{"bess"} object obtained by \code{"bsrr"},
+#' and \eqn{\lambda} in \code{lambda.list} with the smallest loss function. For \code{"bsrr"} object obtained by \code{"bsrr"},
 #' the training loss of the \eqn{i^{th} \lambda} and the \eqn{j^{th}}
 #' \code{s} is at the \eqn{i^{th}} row \eqn{j^{th}} column. Only available when
 #' model selection is based on a certain information criterion.}
 #'
-#' \item{cvm.all}{For \code{bess} objects obtained from \code{gsection}, \code{pgsection} and \code{psequential},
+#' \item{cvm.all}{For \code{bsrr} objects obtained from \code{gsection}, \code{pgsection} and \code{psequential},
 #' \code{cvm.all} contains the mean cross-validation error of the model in each iterative step in the tuning path.
-#' For \code{bess} objects obtained from \code{sequential} path, this is a
+#' For \code{bsrr} objects obtained from \code{sequential} path, this is a
 #'  matrix of the mean cross-validation error of model size
 #' \eqn{s=0,1,\dots,p} and \eqn{\lambda} in \code{lambda.list} with the
-#' smallest loss function. For \code{"bess"} object obtained by \code{"bsrr"}, the training loss of the \eqn{i^{th}
+#' smallest loss function. For \code{"bsrr"} object obtained by \code{"bsrr"}, the training loss of the \eqn{i^{th}
 #' \lambda} and the \eqn{j^{th}} \code{s} is at the \eqn{i^{th}} row
 #' \eqn{j^{th}} column. Only available when model selection is based on the
 #' cross-validation.}
@@ -152,8 +139,8 @@
 #' \item{method}{Method used for tuning parameters selection.}
 #' \item{ic.type}{The criterion of model selection.}
 #' @author Canhong Wen, Aijun Zhang, Shijie Quan, Liyuan Hu, Kangkang Jiang, Yanhang Zhang, Jin Zhu and Xueqin Wang.
-#' @seealso \code{\link{plot.bess}}, \code{\link{summary.bess}},
-#' \code{\link{coef.bess}}, \code{\link{predict.bess}}, \code{\link{bess.one}}.
+#' @seealso \code{\link{plot.bsrr}}, \code{\link{summary.bsrr}},
+#' \code{\link{coef.bsrr}}, \code{\link{predict.bsrr}}.
 #' @references Wen, C., Zhang, A., Quan, S. and Wang, X. (2020). BeSS: An R
 #' Package for Best Subset Selection in Linear, Logistic and Cox Proportional
 #' Hazards Models, \emph{Journal of Statistical Software}, Vol. 94(4).
@@ -174,21 +161,15 @@
 #' y <- Data$y[1:140]
 #' x_new <- Data$x[141:200, ]
 #' y_new <- Data$y[141:200]
-#' lm.bss <- bess(x, y)
 #' lambda.list <- exp(seq(log(5), log(0.1), length.out = 10))
-#' lm.bsrr <- bess(x, y, type = "bsrr", method = "pgsection")
-#' coef(lm.bss)
+#' lm.bsrr <- bsrr(x, y, method = "pgsection")
 #' coef(lm.bsrr)
-#' print(lm.bss)
 #' print(lm.bsrr)
-#' summary(lm.bss)
 #' summary(lm.bsrr)
-#' pred.bss <- predict(lm.bss, newx = x_new)
 #' pred.bsrr <- predict(lm.bsrr, newx = x_new)
 #'
 #' # generate plots
-#' plot(lm.bss, type = "both", breaks = TRUE)
-#' plot(lm.bsrr)
+#' plot(lm.bsrr, type = "both")
 #' #-------------------logistic model----------------------#
 #' #Generate simulated data
 #' Data <- gen.data(n, p, k, rho, family = "binomial", beta = Tbeta, seed = seed)
@@ -197,20 +178,14 @@
 #' y <- Data$y[1:140]
 #' x_new <- Data$x[141:200, ]
 #' y_new <- Data$y[141:200]
-#' logi.bss <- bess(x, y, family = "binomial")
 #' lambda.list <- exp(seq(log(5), log(0.1), length.out = 10))
-#' logi.bsrr <- bess(x, y, type = "bsrr", family = "binomial", lambda.list = lambda.list)
-#' coef(logi.bss)
+#' logi.bsrr <- bsrr(x, y, family = "binomial", lambda.list = lambda.list)
 #' coef(logi.bsrr)
-#' print(logi.bss)
 #' print(logi.bsrr)
-#' summary(logi.bss)
 #' summary(logi.bsrr)
-#' pred.bss <- predict(logi.bss, newx = x_new)
 #' pred.bsrr <- predict(logi.bsrr, newx = x_new)
 #'
 #' # generate plots
-#' plot(logi.bss, type = "both", breaks = TRUE)
 #' plot(logi.bsrr)
 #'#-------------------poisson model----------------------#
 #'Data <- gen.data(n, p, k, rho=0.3, family = "poisson", beta = Tbeta, seed = seed)
@@ -219,21 +194,14 @@
 #' y <- Data$y[1:140]
 #' x_new <- Data$x[141:200, ]
 #' y_new <- Data$y[141:200]
-#' poi.bss <- bess(x, y, family = "poisson")
 #' lambda.list <- exp(seq(log(5), log(0.1), length.out = 10))
-#' poi.bsrr <- bess(x, y, type = "bsrr",
-#'                  family = "poisson", lambda.list = lambda.list)
-#' coef(poi.bss)
+#' poi.bsrr <- bsrr(x, y, family = "poisson", lambda.list = lambda.list)
 #' coef(poi.bsrr)
-#' print(poi.bss)
 #' print(poi.bsrr)
-#' summary(poi.bss)
 #' summary(poi.bsrr)
-#' pred.bss <- predict(poi.bss, newx = x_new)
 #' pred.bsrr <- predict(poi.bsrr, newx = x_new)
 #'
 #' # generate plots
-#' plot(poi.bss, type = "both", breaks = TRUE)
 #' plot(poi.bsrr)
 #' #-------------------coxph model----------------------#
 #' #Generate simulated data
@@ -243,20 +211,14 @@
 #' y <- Data$y[1:140, ]
 #' x_new <- Data$x[141:200, ]
 #' y_new <- Data$y[141:200, ]
-#' cox.bss <- bess(x, y, family = "cox")
 #' lambda.list <- exp(seq(log(5), log(0.1), length.out = 10))
-#' cox.bsrr <- bess(x, y, type = "bsrr", family = "cox", lambda.list = lambda.list)
-#' coef(cox.bss)
+#' cox.bsrr <- bsrr(x, y, family = "cox", lambda.list = lambda.list)
 #' coef(cox.bsrr)
-#' print(cox.bss)
 #' print(cox.bsrr)
-#' summary(cox.bss)
 #' summary(cox.bsrr)
-#' pred.bss <- predict(cox.bss, newx = x_new)
 #' pred.bsrr <- predict(cox.bsrr, newx = x_new)
 #'
 #' # generate plots
-#' plot(cox.bss, type = "both", breaks = TRUE)
 #' plot(cox.bsrr)
 #'
 #'#----------------------High dimensional linear models--------------------#
@@ -264,7 +226,7 @@
 #' data <- gen.data(n, p = 1000, k, family = "gaussian", seed = seed)
 #'
 #'# Best subset selection with SIS screening
-#' lm.high <- bess(data$x, data$y, screening.num = 100)
+#' lm.high <- bsrr(data$x, data$y, screening.num = 100)
 #'}
 #'
 #'#-------------------group selection----------------------#
@@ -275,54 +237,18 @@
 #'
 #'group.index <- c(rep(1, 2), rep(2, 3), rep(3, 2), rep(4, 3),
 #'                 rep(5, 2), rep(6, 3), rep(7, 2), rep(8, 3))
-#'lm.group <- bess(x, y, s.min=1, s.max = 8, type = "bss", group.index = group.index)
-#'lm.groupbsrr <- bess(x, y, type = "bsrr", s.min = 1, s.max = 8, group.index = group.index)
-#'coef(lm.group)
+#'lm.groupbsrr <- bsrr(x, y, s.min = 1, s.max = 8, group.index = group.index)
 #'coef(lm.groupbsrr)
-#'print(lm.group)
 #'print(lm.groupbsrr)
-#'#'summary(lm.group)
 #'summary(lm.groupbsrr)
-#'pred.group <- predict(lm.group, newx = x_new)
 #'pred.groupl0l2 <- predict(lm.groupbsrr, newx = x_new)
 #'#-------------------include specified variables----------------------#
 #'Data <- gen.data(n, p, k, rho, family = "gaussian", beta = Tbeta, seed = seed)
-#'lm.bss <- bess(Data$x, Data$y, always.include = 2)
+#'lm.bsrr <- bsrr(Data$x, Data$y, always.include = 2)
 #'
-#'\dontrun{
-#'#-------------------trim32 data analysis in doi: 10.18637/jss.v094.i04----------------------#
-#'# import trim32 data by:
-#'load(url('https://github.com/Mamba413/bess/tree/master/data/trim32.RData'))
-#'# or manually downloading trim32.RData in the github page:
-#'# "https://github.com/Mamba413/bess/tree/master/data/" and read it by:
-#'load('trim32.RData')
-#'
-#'X <- trim32$x
-#'Y <- trim32$y
-#'dim(X)
-#'
-#'# running bess with argument method = "sequential".
-#' fit.seq <- bess(X, Y, method = "sequential")
-#' summary(fit.seq)
-#'
-#' # the bess function outputs an 'lm' type of object bestmodel associated
-#' # with the selected best model
-#' bm.seq <- fit.seq$bestmodel
-#' summary(bm.seq)
-#' pred.seq <- predict(fit.seq, newdata = data$x)
-#' plot(fit.seq, type = "both", breaks = TRUE)
-#'
-#' # We now call the function bess with argument method = "gsection"
-#' fit.gs <- bess(X, Y, family = "gaussian", method = "gsection")
-#' bm.gs <- fit.gs$bestmodel
-#' summary(bm.gs)
-#' beta <- coef(fit.gs, sparse = TRUE)
-#' class(beta)
-#' pred.gs <- predict(fit.gs, newdata = X)
-#'}
 #' @export
-bess <- function(x, y, family = c("gaussian", "binomial", "poisson", "cox"), type = c("bss", "bsrr"),
-                 method = c("gsection", "sequential", "pgsection", "psequential"),
+bsrr <- function(x, y, family = c("gaussian", "binomial", "poisson", "cox"),
+                 method = c("pgsection", "sequential", "psequential"),
                  tune = c("gic", "ebic", "bic", "aic", "cv"),
                  s.list, lambda.list = 0,
                  s.min, s.max,
@@ -334,6 +260,7 @@ bess <- function(x, y, family = c("gaussian", "binomial", "poisson", "cox"), typ
                  nfolds = 5,
                  group.index =NULL,
                  seed=NULL){
+  type = 'bsrr'
   set.seed(seed)
 
   if(missing(s.list)) s.list <- 1:min(ncol(x),round(nrow(x)/log(nrow(x))))
@@ -349,7 +276,6 @@ bess <- function(x, y, family = c("gaussian", "binomial", "poisson", "cox"), typ
                     "ebic" = 4,
                     "cv" = 1)
   is_cv <- ifelse(tune == "cv", TRUE, FALSE)
-  type <- match.arg(type)
   family <- match.arg(family)
   # FAMILY <- c("gaussian", "binomial", "poisson", "cox")
   # family <- pmatch(family, FAMILY)
@@ -392,19 +318,6 @@ bess <- function(x, y, family = c("gaussian", "binomial", "poisson", "cox"), typ
     gi <- unique(group.index)
     g_index <- match(gi, group.index)-1
     g_df <- c(diff(g_index), length(group.index) - g_index[length(g_index)])
-    # g_df <- NULL
-    # g_index <- NULL
-    # group_set <- unique(group.index)
-    # j <- 1
-    # k <- 0
-    # for(i in group_set){
-    #   while(group.index[j] != i){
-    #     j <- j+1
-    #     k <- k+1
-    #   }
-    #   g_index <- c(g_index, j - 1)
-    #   g_df <- c(g_df, k)
-    # }
     algorithm_type = switch(type,
                             "bss" = "GPDAS",
                             "bsrr" = "GL0L2")
@@ -564,7 +477,7 @@ bess <- function(x, y, family = c("gaussian", "binomial", "poisson", "cox"), typ
     res.pdas$s.min <- s.min
     if(screening) res.pdas$screening_A <-  res.pdas$screening_A + 1;
     res.pdas$call <- match.call()
-    class(res.pdas) <- 'bess'
+    class(res.pdas) <- 'bsrr'
     #res.pdas$beta_all <- res.pdas$beta.all
     res.pdas$beta.all <- recover(res.pdas, F)
     if(family == "gaussian"){
@@ -625,7 +538,7 @@ bess <- function(x, y, family = c("gaussian", "binomial", "poisson", "cox"), typ
     res.gpdas$g_df <- g_df
     if(screening) res.gpdas$screening_A <-  res.gpdas$screening_A + 1;
     res.gpdas$call <- match.call()
-    class(res.gpdas) <- "bess"
+    class(res.gpdas) <- "bsrr"
     #res.gpdas$beta_all <- res.gpdas$beta.all
     res.gpdas$beta.all <- recover(res.gpdas, F)
     xbest <- x[,which(beta.gpdas!=0)]
@@ -694,7 +607,7 @@ bess <- function(x, y, family = c("gaussian", "binomial", "poisson", "cox"), typ
     res.gl0l2$g_df <- g_df
     if(screening) res.gl0l2$screening_A <-  res.gl0l2$screening_A + 1;
     res.gl0l2$call <- match.call()
-    class(res.gl0l2) <- "bess"
+    class(res.gl0l2) <- "bsrr"
     #res.gl0l2$beta_all <- res.gl0l2$beta.all
     res.gl0l2$beta.all <- recover(res.gl0l2, F)
     res.gl0l2$bestmodel <- NULL
@@ -753,7 +666,7 @@ bess <- function(x, y, family = c("gaussian", "binomial", "poisson", "cox"), typ
     res.l0l2$nlambda <- nlambda
     if(screening) res.l0l2$screening_A <-  res.l0l2$screening_A + 1;
     res.l0l2$call <- match.call()
-    class(res.l0l2) <- "bess"
+    class(res.l0l2) <- "bsrr"
     #res.l0l2$beta_all <- res.l0l2$beta.all
     res.l0l2$beta.all <- recover(res.l0l2, F)
     res.l0l2$bestmodel <- NULL

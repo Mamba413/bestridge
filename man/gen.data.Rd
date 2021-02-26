@@ -117,9 +117,8 @@ x <- Data$x[1:140, ]
 y <- Data$y[1:140]
 x_new <- Data$x[141:200, ]
 y_new <- Data$y[141:200]
-lm.bss <- bess(x, y, method = "sequential")
 lambda.list <- exp(seq(log(5), log(0.1), length.out = 10))
-lm.bsrr <- bess(x, y, type = "bsrr", method = "pgsection")
+lm.bsrr <- bsrr(x, y, method = "pgsection")
 }
 \references{
 Wen, C., Zhang, A., Quan, S. and Wang, X. (2020). BeSS: An R
@@ -128,7 +127,7 @@ Hazards Models, \emph{Journal of Statistical Software}, Vol. 94(4).
 doi:10.18637/jss.v094.i04.
 }
 \seealso{
-\code{\link{bess}}, \code{\link{predict.bess}}.
+\code{\link{bsrr}}, \code{\link{predict.bsrr}}.
 }
 \author{
 Canhong Wen, Aijun Zhang, Shijie Quan, Liyuan Hu, Kangkang Jiang, Yanhang Zhang, Jin Zhu and Xueqin Wang.
