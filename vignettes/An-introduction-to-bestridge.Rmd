@@ -131,7 +131,7 @@ plot(logi.bsrr)
 
 The `bestridge` package also supports studying the relationship between predictors variables and survival time based on the Cox proportional hazard model. We now demonstrate the usage on a real data set, Alizadeh, Eisen, Davis, Ma, Lossos, Rosenwald, Boldrick, Sabet, Tran, Yu et al. (2000)[@alizadeh2000distinct]: gene-expression data in lymphoma patients. There were 240 patients with measurements on 7399 probes.
 ```{r, warning=FALSE, message = FALSE}
-data(LymphomaData, package = "HCmodelSets")
+data(LymphomaData)
 
 x <- t(patient.data$x)
 y <- patient.data$time

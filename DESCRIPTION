@@ -28,6 +28,5 @@ LinkingTo: Rcpp, RcppEigen
 RoxygenNote: 7.1.1
 Suggests: 
     knitr,
-    HCmodelSets,
     rmarkdown
 VignetteBuilder: knitr
