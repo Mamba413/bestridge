@@ -138,13 +138,9 @@
 #' \item{type}{Either \code{"bss"} or \code{"bsrr"}.}
 #' \item{method}{Method used for tuning parameters selection.}
 #' \item{ic.type}{The criterion of model selection.}
-#' @author Canhong Wen, Aijun Zhang, Shijie Quan, Liyuan Hu, Kangkang Jiang, Yanhang Zhang, Jin Zhu and Xueqin Wang.
+#' @author Liyuan Hu, Kangkang Jiang, Yanhang Zhang, Jin Zhu, Canhong Wen and Xueqin Wang.
 #' @seealso \code{\link{plot.bsrr}}, \code{\link{summary.bsrr}},
 #' \code{\link{coef.bsrr}}, \code{\link{predict.bsrr}}.
-#' @references Wen, C., Zhang, A., Quan, S. and Wang, X. (2020). BeSS: An R
-#' Package for Best Subset Selection in Linear, Logistic and Cox Proportional
-#' Hazards Models, \emph{Journal of Statistical Software}, Vol. 94(4).
-#' doi:10.18637/jss.v094.i04.
 #' @examples
 #'
 #' #-------------------linear model----------------------#

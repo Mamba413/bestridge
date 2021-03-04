@@ -20,12 +20,7 @@
 #' the coefficient paths.
 #' @param K For \code{"bsrr"} object without \eqn{L_2} shrinkage: Which break point should the vertical line be drawn at. Default is the optimal model size.
 #' @param \dots Other graphical parameters to plot
-#' @author Canhong Wen, Aijun Zhang, Shijie Quan, Liyuan Hu, Kangkang Jiang, Yanhang Zhang, Jin Zhu and Xueqin Wang.
 #' @seealso \code{\link{bsrr}}.
-#' @references Wen, C., Zhang, A., Quan, S. and Wang, X. (2020). BeSS: An R
-#' Package for Best Subset Selection in Linear, Logistic and Cox Proportional
-#' Hazards Models, \emph{Journal of Statistical Software}, Vol. 94(4).
-#' doi:10.18637/jss.v094.i04.
 #' @return
 #' No return value, called for plots generation
 #' @examples
@@ -45,6 +40,7 @@
 #' # generate plots
 #' plot(lm.bsrr)
 #'
+#'@inherit bsrr return author
 #'
 #'@method plot bsrr
 #'@export
