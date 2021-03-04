@@ -37,7 +37,7 @@ NULL
 #' @title Lymphoma patients data set
 #' @name patient.data
 #' @docType data
-#' @details Data set of lymphoma patients used in the study of Alizadeh et al. (2000) and also Simon et al.
+#' @details A subset of the data set of lymphoma patients used in the study of Alizadeh et al. (2000) and also Simon et al.
 #' (2011).
 #'
 #' @format patient.data A list with survival times, staus and covariates from patients.

@@ -11,7 +11,7 @@ patient.data A list with survival times, staus and covariates from patients.
 Lymphoma patients data set
 }
 \details{
-Data set of lymphoma patients used in the study of Alizadeh et al. (2000) and also Simon et al.
+A subset of the data set of lymphoma patients used in the study of Alizadeh et al. (2000) and also Simon et al.
 (2011).
 }
 \references{
