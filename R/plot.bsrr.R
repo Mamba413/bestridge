@@ -11,11 +11,9 @@
 #' If (\code{type = "tune"}), the path of corresponding information criterion
 #' or cross-validation loss is provided;
 #' If \code{type = "coefficients"}, a lambda should be provided and and this funciton provides a coefficient profile plot of the coefficient;
-#' If \code{type = "both"}, it combines the path of corresponding information criterion or cross-validation loss with the coefficient profile plot.
 #' For \code{"bsrr"} object without \eqn{L_2} shrinkage:
 #' If \code{type = "tune"}, a path of lcorresponding information criterion or cross-validation loss is provided.
 #' If \code{type = "coefficients"}, it provides a coefficient profile plot of the coefficient.
-#' If \code{type = "both"}, it combines the path of corresponding information criterion or cross-validation loss with the coefficient profile plot.
 #' @param lambda For \code{"bsrr"} with \eqn{L_2} shrinkage: To plot the change of coefficients with lambda equals this value for \code{type = "coefficients"} or \code{type = "both"}.
 #' @param sign.lambda For \code{"bsrr"} with \eqn{L_2} shrinkage: A logical value indicating whether to show lambda on log scale. Default is 0.
 #' @param breaks For \code{"bsrr"} object without \eqn{L_2} shrinkage: If \code{TRUE}, a vertical line is drawn at a specified break point in
@@ -51,7 +49,7 @@
 #'@method plot bsrr
 #'@export
 #'@export plot.bsrr
-plot.bsrr<-function(x, type=c( "tune", "coefficients", "both"),lambda = NULL, sign.lambda = 0, breaks=T, K=NULL, ...)
+plot.bsrr<-function(x, type=c( "tune", "coefficients"),lambda = NULL, sign.lambda = 0, breaks=T, K=NULL, ...)
 {
   originalpar <- par(no.readonly = TRUE)
   on.exit(par(originalpar))

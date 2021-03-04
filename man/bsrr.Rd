@@ -217,7 +217,7 @@ summary(lm.bsrr)
 pred.bsrr <- predict(lm.bsrr, newx = x_new)
 
 # generate plots
-plot(lm.bsrr, type = "both")
+plot(lm.bsrr)
 #-------------------logistic model----------------------#
 #Generate simulated data
 Data <- gen.data(n, p, k, rho, family = "binomial", beta = Tbeta, seed = seed)

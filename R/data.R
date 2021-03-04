@@ -35,7 +35,7 @@ NULL
 NULL
 
 #' @title Lymphoma patients data set
-#' @name LymphomaData
+#' @name patient.data
 #' @docType data
 #' @details Data set of lymphoma patients used in the study of Alizadeh et al. (2000) and also Simon et al.
 #' (2011).
