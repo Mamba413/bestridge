@@ -4,11 +4,11 @@ Title: A Comprehensive R package for Best Subset Selection
 Version: 1.0.3
 Date: 2021-03-04
 Authors@R: c(
-  person(given = "Liyuan", family = "Hu", email = "huly5@mail2.sysu.edu.cn", role = c("aut", "cre"),comment = c(ORCID = "0000-0003-2064-8990")),
+  person(given = "Liyuan", family = "Hu", email = "huly5@mail2.sysu.edu.cn", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-2064-8990")),
+  person(given = "Jin", family = "Zhu", email = "zhuj37@mail2.sysu.edu.cn", role = c("aut"), comment = c(ORCID = "0000-0001-8550-5822")),
   person(given = "Kangkang", family = "Jiang", email = "jiangkk3@mail2.sysu.edu.cn" ,role = c("aut")),
   person(given = "Yanhang", family = "Zhang", email = "zhangyh98@ruc.edu.cn", role = c("aut")),
-  person(given = "Jin", family = "Zhu", email = "zhuj37@mail2.sysu.edu.cn", role = c("aut"),comment = c(ORCID = "0000-0001-8550-5822")),
-  person(given = "Xueqin", family = "Wang", email = "wangxq20@ustc.edu.cn", role = c("aut"),comment = c(ORCID = "0000-0001-5205-9950")),
+  person(given = "Xueqin", family = "Wang", email = "wangxq20@ustc.edu.cn", role = c("aut"), comment = c(ORCID = "0000-0001-5205-9950")),
   person(given = "Canhong", family = "Wen", email = "wencanhong@gmail.com", role = c("aut")))
 Author: 
   Liyuan Hu [aut, cre],
