@@ -104,7 +104,7 @@ Denote the first group as \code{1}, the second \code{2}, etc.
 If you do not fit a model with a group structure,
 please set \code{group.index = NULL}. Default is \code{NULL}.}
 
-\item{seed}{Seed to be used to devide the sample into K cross-validation folds. Default is \code{NULL}.}
+\item{seed}{Seed to be used to divide the sample into K cross-validation folds. Default is \code{NULL}.}
 }
 \value{
 A list with class attribute 'bsrr' and named components:

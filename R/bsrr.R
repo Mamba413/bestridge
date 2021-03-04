@@ -79,7 +79,7 @@
 #' Denote the first group as \code{1}, the second \code{2}, etc.
 #' If you do not fit a model with a group structure,
 #' please set \code{group.index = NULL}. Default is \code{NULL}.
-#' @param seed Seed to be used to devide the sample into K cross-validation folds. Default is \code{NULL}.
+#' @param seed Seed to be used to divide the sample into K cross-validation folds. Default is \code{NULL}.
 #' @return A list with class attribute 'bsrr' and named components:
 #' \item{beta}{The best fitting coefficients.}
 #'  \item{coef0}{The best fitting
