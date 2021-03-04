@@ -13,6 +13,8 @@
 
 ## bestridge 1.0.3
 
-* Mistakenly included authors have been removed.
+* Update authorship.
+
+* Update documents.
 
 * The `plot.bsrr` function is now available for drawing the coefficients path with a fixed lambda.
