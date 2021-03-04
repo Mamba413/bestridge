@@ -18,7 +18,7 @@ Author:
   Xueqin Wang [aut],
   Canhong Wen [aut]
 Maintainer:  Liyuan Hu <huly5@mail2.sysu.edu.cn>
-Description: The bestridge package is designed to provide a one-stand service for users to successfully carry out best ridge regression in various complex situations. This package allows users to perform the regression, classification, count regression and censored regression for (ultra) high dimensional data, and it also supports advanced usages like group variable selection and nuisance variable selection.
+Description: The bestridge package is designed to provide a one-stand service for users to successfully carry out best ridge regression in various complex situations via the primal dual active set algorithm proposed by Wen, C., Zhang, A., Quan, S. and Wang, X. (2020) <doi:10.18637/jss.v094.i04>. This package allows users to perform the regression, classification, count regression and censored regression for (ultra) high dimensional data, and it also supports advanced usages like group variable selection and nuisance variable selection.
 License: GPL-3
 Depends: R (>= 3.5.0)
 Encoding: UTF-8
