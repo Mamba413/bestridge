@@ -10,11 +10,3 @@
 * We add output information in all .Rd files.
 
 * We use on.exit to make sure we do not change users' par in `plot.bsrr`.
-
-## bestridge 1.0.3
-
-* Update authorship.
-
-* Update documents.
-
-* The `plot.bsrr` function is now available for drawing the coefficients path with a fixed lambda.
