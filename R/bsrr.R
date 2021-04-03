@@ -39,7 +39,7 @@
 #' solve the best subset ridge regression problem. Any unambiguous substring can be given.
 #' @param tune The criterion for choosing the model size and \eqn{L_2} shrinkage
 #' parameters. Available options are \code{"gic"}, \code{"ebic"}, \code{"bic"}, \code{"aic"} and \code{"cv"}.
-#' Default is \code{"gic"}.
+#' Default is \code{"gic"}. \code{"cv"} is recommanded for BSRR.
 #' @param s.list An increasing list of sequential values representing the model
 #' sizes. Only used for \code{method = "sequential"}. Default is \code{1:min(p,
 #' round(n/log(n)))}.
