@@ -7,3 +7,7 @@
 * Update documents.
 
 * The `plot.bsrr` function is now available for drawing the coefficients path with a fixed lambda.
+
+# bestridge 1.0.5
+
+* Allow best subset selection in the bestridge package.
